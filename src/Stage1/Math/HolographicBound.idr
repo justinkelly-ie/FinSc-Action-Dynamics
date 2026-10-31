@@ -85,12 +85,12 @@ saturateQuadStreamHolographic dimL (MkQuadStream e h p s) =
 ||| Certified holographic 2D boundary surface area dimension (Area = 54 Maxels).
 public export
 holographicAreaDimension : CosmicDimension
-holographicAreaDimension = dimHolographic54
+holographicAreaDimension = dimHolographic
 
 ||| Certified multi-sector holographic boundary capacity dimension (4 * 54 = 216).
 public export
 multiSectorHolographicDimension : CosmicDimension
-multiSectorHolographicDimension = dimHolographic216
+multiSectorHolographicDimension = dimHolographicEnclosure
 
 ||| Audits 2D Boundary Surface Area Calculation:
 ||| For L = 3 (27-cell 3-torus volume), Area = 6 * 3^2 = 54 boundary Maxels.
