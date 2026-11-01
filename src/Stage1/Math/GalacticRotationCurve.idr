@@ -44,7 +44,7 @@ public export
 enclosedMassStream : BoxInt -> FusedStream (Token (CoordCell 1)) -> BoxInt
 enclosedMassStream radius strm =
   foldStream (\acc, (MkToken c) =>
-    let r = natToBoxInt (coordAxis 0 c)
+    let r = natToBoxInt (unwrapUnixel c)
     in if r <= radius then acc + intToBoxInt 1 else acc) (intToBoxInt 0) strm
 
 ||| Evaluates total galactic mass from a deforested mass token stream:
