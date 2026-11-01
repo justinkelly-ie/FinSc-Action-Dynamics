@@ -47,7 +47,7 @@ public export
 fastNatPower : Nat -> Nat -> Nat
 fastNatPower _ Z = 1
 fastNatPower b (S Z) = b
-fastNatPower b exp = loop exp b 1 (exp + 10)
+fastNatPower b exp = loop exp b 1 (S exp)
   where
     loop : Nat -> Nat -> Nat -> Nat -> Nat
     loop _ _ acc Z = acc
@@ -81,6 +81,14 @@ scaledLevelWeight (MkEnergyLevel e w) maxLevel numQ denQ =
   let pNum = fastNatPower numQ e
       pDen = fastNatPower denQ (maxLevel `minus` e)
   in w * (pNum * pDen)
+
+||| Deforested stream evaluation of scaled partition sum numerator over FusedStream EnergyLevel:
+||| Computes ∑ w_k · N^k · D^{m-k} with zero intermediate list allocations.
+public export
+streamScaledPartitionSum : FusedStream EnergyLevel -> (maxLevel : Nat) -> (numQ : Nat) -> (denQ : Nat) -> Nat
+streamScaledPartitionSum strm maxLevel numQ denQ =
+  foldStreamNat (S maxLevel) (+) 0
+    (mapStream (\lvl => scaledLevelWeight lvl maxLevel numQ denQ) strm)
 
 ------------------------------------------------------------------------
 -- 2. DISCRETE BOLTZMANN PROBABILITIES AS RATIONAL HEHNER CHANCES

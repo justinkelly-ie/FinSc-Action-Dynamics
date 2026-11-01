@@ -62,10 +62,18 @@ spinorProbabilityDensity (MkDiracSpinor4 c1 c2 c3 c4) =
       v4 = evalSpinorComponent c4
   in (v1 * v1) + (v2 * v2) + (v3 * v3) + (v4 * v4)
 
-||| Converts 4-component Dirac Bispinor into a deforested FusedStream of Pixel components.
+||| Zero-allocation deforested FusedStream of 4-component Dirac Bispinor in O(1) registers.
 public export
 spinorToStream : DiracSpinor4 -> FusedStream Pixel
-spinorToStream (MkDiracSpinor4 c1 c2 c3 c4) = stream [c1, c2, c3, c4]
+spinorToStream (MkDiracSpinor4 c1 c2 c3 c4) =
+  unfoldStream step (the Nat 0)
+  where
+    step : Nat -> Step Nat Pixel
+    step 0 = Yield c1 1
+    step 1 = Yield c2 2
+    step 2 = Yield c3 3
+    step 3 = Yield c4 4
+    step _ = Done
 
 ||| Computes Dirac probability density directly across spatial spinor components using mapStream and foldStreamNat.
 public export
@@ -239,33 +247,48 @@ auditSpinorDensityPositivityProof =
 -- 6. DYNAMIC SPREAD COMPANION BOOST & COORDINATE PERSISTENCE
 ------------------------------------------------------------------------
 
-||| A discrete 2-component polarization/relativistic spinor state vector.
+||| A discrete 2-component polarization/relativistic spinor state vector on arbitrary basis coordinates (i, j).
+public export
+weylSpinorVexelAt : (i : Nat) -> (j : Nat) -> (u : BoxInt) -> (v : BoxInt) -> Vexel
+weylSpinorVexelAt i j u v = singletonCell (mkUnixel i) u <+> singletonCell (mkUnixel j) v
+
+||| A discrete 2-component polarization/relativistic spinor state vector on standard coordinates (1, 2).
 public export
 weylSpinorVexel : (u : BoxInt) -> (v : BoxInt) -> Vexel
-weylSpinorVexel u v = singletonCell (mkUnixel 1) u <+> singletonCell (mkUnixel 2) v
+weylSpinorVexel = weylSpinorVexelAt 1 2
 
-||| Applies a dynamic Pythagorean spread boost/precession operator M(x, y) to a 2-spinor state:
-||| M(x, y) = [[2 * Q_Red, -Q_Blue], [Q_Blue, 0]].
+||| Applies a dynamic Pythagorean spread boost/precession operator M(x, y) across coordinates (i, j):
+public export
+boostSpinorSpreadAt : (i : Nat) -> (j : Nat) -> (x : BoxInt) -> (y : BoxInt) -> Vexel -> Vexel
+boostSpinorSpreadAt i j x y s =
+  canonicalizeVexel (actMaxelVexel (pythagoreanSpreadMaxelAt i j x y) s)
+
+||| Applies a dynamic Pythagorean spread boost/precession operator M(x, y) to standard 2-spinor (1, 2):
 public export
 boostSpinorSpread : (x : BoxInt) -> (y : BoxInt) -> Vexel -> Vexel
-boostSpinorSpread x y s = canonicalizeVexel (actMaxelVexel (pythagoreanSpreadMaxel x y) s)
+boostSpinorSpread = boostSpinorSpreadAt 1 2
 
-||| Invariant audit verifying coordinate-preserving spinor boost:
-||| For a pure polarization eigenstate [1] with weight u (v = 0),
-||| coordinate 1 persists with exact weight (2 * Q_Red * u) without destruction,
-||| and transitions to coordinate 2 with weight (Q_Blue * u).
+||| Generalized invariant audit verifying coordinate-preserving spinor boost across arbitrary coordinates (i, j):
+||| For a pure polarization eigenstate [i] with weight u (v = 0),
+||| coordinate i persists with exact weight (2 * Q_Red * u) without destruction,
+||| and transitions to coordinate j with weight (Q_Blue * u).
 public export
-auditSpinorSpreadBoostProof : (x : BoxInt) -> (y : BoxInt) -> (u : BoxInt) -> Bool
-auditSpinorSpreadBoostProof x y u =
+auditSpinorSpreadBoostGenericProof : (i : Nat) -> (j : Nat) -> (x : BoxInt) -> (y : BoxInt) -> (u : BoxInt) -> Bool
+auditSpinorSpreadBoostGenericProof i j x y u =
   let qBlue = (x * x) + (y * y)
       qRed  = (x * x) - (y * y)
-      sIn   = weylSpinorVexel u (intToBoxInt 0)
-      sOut  = boostSpinorSpread x y sIn
-      persisted = lookupUnixel (MkUnixel 1) sOut
-      transition = lookupUnixel (MkUnixel 2) sOut
+      sIn   = weylSpinorVexelAt i j u (intToBoxInt 0)
+      sOut  = boostSpinorSpreadAt i j x y sIn
+      persisted = lookupUnixel (MkUnixel i) sOut
+      transition = lookupUnixel (MkUnixel j) sOut
       expectedPersist = (intToBoxInt 2 * qRed) * u
       expectedTrans   = qBlue * u
   in boxEq persisted expectedPersist && boxEq transition expectedTrans
+
+||| Invariant audit verifying coordinate-preserving spinor boost on canonical coordinates (1, 2):
+public export
+auditSpinorSpreadBoostProof : (x : BoxInt) -> (y : BoxInt) -> (u : BoxInt) -> Bool
+auditSpinorSpreadBoostProof = auditSpinorSpreadBoostGenericProof 1 2
 
 ------------------------------------------------------------------------
 -- 7. 4-COMPONENT DISCRETE DIRAC SPINOR MULTISET & DIHEDRON BOOSTS
@@ -296,11 +319,18 @@ spinorMultisetDensity : DiracSpinorMultiset -> BoxInt
 spinorMultisetDensity (MkDiracSpinor [p0, p1] [p2, p3]) =
   (p0 * p0) + (p1 * p1) + (p2 * p2) + (p3 * p3)
 
-||| Converts DiracSpinorMultiset into a deforested FusedStream of 4 BoxInt components.
+||| Zero-allocation deforested FusedStream of DiracSpinorMultiset components in O(1) registers.
 public export
 spinorMultisetToStream : DiracSpinorMultiset -> FusedStream BoxInt
 spinorMultisetToStream (MkDiracSpinor [p0, p1] [p2, p3]) =
-  stream [p0, p1, p2, p3]
+  unfoldStream step (the Nat 0)
+  where
+    step : Nat -> Step Nat BoxInt
+    step 0 = Yield p0 1
+    step 1 = Yield p1 2
+    step 2 = Yield p2 3
+    step 3 = Yield p3 4
+    step _ = Done
 
 ||| Computes probability density via deforested stream fold in O(1) auxiliary memory.
 public export
