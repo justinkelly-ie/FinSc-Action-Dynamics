@@ -338,6 +338,33 @@ stagedTransformSpinor qd sp =
   let d = TTS.splice qd
   in TTS.quote (boostDiracSpinor d sp)
 
+||| 2LTT Staged Composite Lorentz Boost: D_total = D2 * D1 at Level 1:
+public export
+stagedCompositeBoost : TTS.Lift DM.Dihedron2 -> TTS.Lift DM.Dihedron2 -> TTS.Code DM.Dihedron2
+stagedCompositeBoost qD1 qD2 = DM.stagedMulDihedron2 qD2 qD1
+
+||| 2LTT Staged Multi-Boost Spinor Transformation:
+||| Pre-composes two boosts at compile time before acting on the spinor once.
+public export
+stagedTransformSpinorComposite : TTS.Lift DM.Dihedron2 -> TTS.Lift DM.Dihedron2 -> DiracSpinorMultiset -> TTS.Code DiracSpinorMultiset
+stagedTransformSpinorComposite qD1 qD2 sp =
+  let qComp = stagedCompositeBoost qD1 qD2
+      d = TTS.splice qComp
+  in TTS.quote (boostDiracSpinor d sp)
+
+||| Staged evaluation of multi-boost spinor transformation:
+public export
+evalStagedTransformSpinorComposite : TTS.Lift DM.Dihedron2 -> TTS.Lift DM.Dihedron2 -> DiracSpinorMultiset -> DiracSpinorMultiset
+evalStagedTransformSpinorComposite qD1 qD2 sp =
+  TTS.splice (stagedTransformSpinorComposite qD1 qD2 sp)
+
+||| QTT 0 Erased Proof Witness: Staged Composite Boost Equivalence
+public export
+0 prfStagedCompositeBoost : (d1, d2 : DM.Dihedron2) -> (sp : DiracSpinorMultiset) ->
+                            TTS.splice (stagedTransformSpinorComposite (TTS.quote d1) (TTS.quote d2) sp) =
+                              boostDiracSpinor (DM.mulDihedron2 d2 d1) sp
+prfStagedCompositeBoost _ _ _ = Refl
+
 ||| Audit: Identity boost preserves spinor identically.
 public export
 auditDiracSpinorIdentityBoost : DiracSpinorMultiset -> Bool
