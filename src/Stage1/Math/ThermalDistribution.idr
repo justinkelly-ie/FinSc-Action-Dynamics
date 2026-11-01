@@ -271,6 +271,13 @@ public export
 0 prfCosmicPartitionDegree : (2 * 2 * 2 = 8)
 prfCosmicPartitionDegree = Refl
 
+||| Deforested StreamPolynumber representation of the Cosmic Partition Function via Caret product:
+||| Z_Cosmic = Z_Ell ^ Z_Hyp ^ Z_Par.
+public export
+cosmicCaretStreamPoly : StreamPolynumber
+cosmicCaretStreamPoly =
+  streamPolyCaret (streamPolyCaret ellipticStreamPoly hyperbolicStreamPoly) parabolicStreamPoly
+
 ||| Evaluates QuadStream partition sum across all 4 geometric sectors.
 public export
 quadStreamPartitionSum : QuadStreamMultiset Stage0.BoxInt.BoxInt -> (maxLevel : Nat) -> (numQ : Nat) -> (denQ : Nat) -> Nat
@@ -288,11 +295,19 @@ quadStreamPartitionSum (MkQuadStream e h p s) maxLevel numQ denQ =
 -- 4. CONSTRUCTIVE FORMAL AUDIT PROOFS
 ------------------------------------------------------------------------
 
-||| Audits Boltzmann partition factorization and ground state collapse:
+||| Audits Boltzmann partition factorization, deforested Caret stream equivalence, and ground state collapse:
 public export
 auditThermalDistributionProof : Bool
 auditThermalDistributionProof =
-  auditStreamPartitionEquivalenceProof
+  let one = intToBoxInt 1
+      zero = intToBoxInt 0
+      zStream1 = evalStreamPolyGoh one cosmicCaretStreamPoly
+      zPoly1 = Stage1.Polynumber.evalPolynumber cosmicCaretPartitionPoly one
+      zStream0 = evalStreamPolyGoh zero cosmicCaretStreamPoly
+      zPoly0 = Stage1.Polynumber.evalPolynumber cosmicCaretPartitionPoly zero
+  in auditStreamPartitionEquivalenceProof &&
+     boxEq zStream1 zPoly1 &&
+     boxEq zStream0 zPoly0
 
 ------------------------------------------------------------------------
 -- 5. CATEGORY-THEORETIC MULTISET ADJUNCTION

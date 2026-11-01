@@ -14,6 +14,8 @@ import Stage1.Math.QuadStreamPhysicalLaws
 import Stage1.MultisetDuality
 import Stage1.MultisetTensor
 import Stage1.FourGeometries
+import Stage1.Math.OnSeq.SpreadStream
+import Stage1.Carrier.Maxel
 import Data.List
 import Data.Nat
 
@@ -140,8 +142,36 @@ evaluateCompositeBaryonEvolution =
       photonsProduced = photonTokens frozenState
   in bViol && outEq && cpViol && (netSurviving == Stage0.BoxInt.intToBoxInt 7) && (photonsProduced == Stage0.BoxInt.intToBoxInt 106)
 
+------------------------------------------------------------------------
+-- 5. CANONICAL 210 x 210 COSMIC MASTER COMPANION MAXEL
+------------------------------------------------------------------------
+
+||| Canonical 210 x 210 Master Companion Maxel for the Primorial 210 cosmic ground state.
+||| Folds Cigler-Herbig divisor companion blocks across all divisors d | 210
+||| with diagonal cumulative coordinate shifting in O(1) heap allocation.
+public export
+masterPrimorial210CompanionMaxel : Maxel
+masterPrimorial210CompanionMaxel = cyclotomicDirectSumMaxelHylo 210
+
+||| Certified Cyclotomic Spread Decomposition for the Master Substrate Primorial 210 state.
+public export
+certifiedPrimorial210Spread : CertifiedCyclotomicSpread 210
+certifiedPrimorial210Spread = certifiedCyclotomicSpread 210
+
+||| QTT 0 Erased Compile-Time Proof: Master Primorial 210 totient capacity conservation.
+public export
+0 prfMasterPrimorial210DimensionConservation : Stage1.Math.CosmicGenesis.certifiedPrimorial210Spread.totientCapacity = 210
+prfMasterPrimorial210DimensionConservation = Refl
+
+||| Audits the Master Primorial 210 Companion Maxel and Certified Spread Capacity:
+public export
+auditMasterPrimorial210CompanionProof : Bool
+auditMasterPrimorial210CompanionProof =
+  let spread = certifiedPrimorial210Spread
+  in spread.totientCapacity == 210 && spread.degree == 210
+
 --------------------------------------------------------------------------------
--- 5. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
+-- 6. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
 --------------------------------------------------------------------------------
 
 ||| Left adjoint Cosmic Genesis functor wrapping micro genesis state and payload a

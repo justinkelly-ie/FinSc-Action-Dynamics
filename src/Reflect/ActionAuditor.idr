@@ -157,6 +157,16 @@ public export
 auditCompositeCosmicBaryonConservation : Elab (Reflect.ActionAuditor.auditCompositeCosmicBaryonConservationProofExport = True)
 auditCompositeCosmicBaryonConservation = auditWitness Reflect.ActionAuditor.auditCompositeCosmicBaryonConservationProofExport
 
+||| Audit 12: Canonical Primorial 210 Companion Maxel Totient Conservation.
+public export
+auditMasterPrimorial210CompanionProofExport : Bool
+auditMasterPrimorial210CompanionProofExport = Stage1.Math.CosmicGenesis.auditMasterPrimorial210CompanionProof
+
+public export
+%macro
+auditMasterPrimorial210Companion : Elab (Reflect.ActionAuditor.auditMasterPrimorial210CompanionProofExport = True)
+auditMasterPrimorial210Companion = auditWitness Reflect.ActionAuditor.auditMasterPrimorial210CompanionProofExport
+
 ||| Batch action dynamic auditor witnesses.
 public export
 actionAuditorWitnesses : List Bool
@@ -172,6 +182,7 @@ actionAuditorWitnesses =
   , auditSymplecticFreeParticleProofExport
   , auditDeforestedQuadStreamPipelineProofExport
   , auditCompositeCosmicBaryonConservationProofExport
+  , auditMasterPrimorial210CompanionProofExport
   ]
 
 
