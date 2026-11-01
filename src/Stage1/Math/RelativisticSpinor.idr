@@ -365,6 +365,51 @@ public export
                               boostDiracSpinor (DM.mulDihedron2 d2 d1) sp
 prfStagedCompositeBoost _ _ _ = Refl
 
+------------------------------------------------------------------------
+-- 5B. RELATIVISTIC LORENTZ BOOST GROUPOID ALGEBRA (BoostChain)
+------------------------------------------------------------------------
+
+||| An inductive algebraic chain of discrete Minkowski Dihedron2 Lorentz boosts:
+public export
+data BoostChain : Type where
+  IdBoost   : BoostChain
+  ConsBoost : DM.Dihedron2 -> BoostChain -> BoostChain
+
+||| Multiplies all boosts in a BoostChain down to a single effective Dihedron2:
+public export
+collapseBoostChain : BoostChain -> DM.Dihedron2
+collapseBoostChain IdBoost = DM.identityDihedron2
+collapseBoostChain (ConsBoost d rest) =
+  DM.mulDihedron2 d (collapseBoostChain rest)
+
+||| 2LTT Staged Boost Chain Compiler:
+||| Multiplies the entire boost sequence at Level 1 into a single effective Dihedron2.
+public export
+stagedCompileBoostChain : TTS.Lift BoostChain -> TTS.Code DM.Dihedron2
+stagedCompileBoostChain qChain =
+  TTS.quote (collapseBoostChain (TTS.splice qChain))
+
+||| Staged Spinor Boost Transformation: Acts on the spinor exactly once with the compiled boost.
+public export
+stagedApplyBoostChain : TTS.Lift BoostChain -> DiracSpinorMultiset -> TTS.Code DiracSpinorMultiset
+stagedApplyBoostChain qChain sp =
+  let qEff = stagedCompileBoostChain qChain
+      d = TTS.splice qEff
+  in TTS.quote (boostDiracSpinor d sp)
+
+||| Staged evaluation of BoostChain application on spinor:
+public export
+evalStagedApplyBoostChain : TTS.Lift BoostChain -> DiracSpinorMultiset -> DiracSpinorMultiset
+evalStagedApplyBoostChain qChain sp =
+  TTS.splice (stagedApplyBoostChain qChain sp)
+
+||| QTT 0 Erased Proof Witness: BoostChain Compilation Soundness
+public export
+0 prfStagedApplyBoostChain : (chain : BoostChain) -> (sp : DiracSpinorMultiset) ->
+                            TTS.splice (stagedApplyBoostChain (TTS.quote chain) sp) =
+                              boostDiracSpinor (collapseBoostChain chain) sp
+prfStagedApplyBoostChain _ _ = Refl
+
 ||| Audit: Identity boost preserves spinor identically.
 public export
 auditDiracSpinorIdentityBoost : DiracSpinorMultiset -> Bool
