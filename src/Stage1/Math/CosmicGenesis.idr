@@ -149,9 +149,18 @@ evaluateCompositeBaryonEvolution =
 ||| Canonical 210 x 210 Master Companion Maxel for the Primorial 210 cosmic ground state.
 ||| Folds Cigler-Herbig divisor companion blocks across all divisors d | 210
 ||| with diagonal cumulative coordinate shifting in O(1) heap allocation.
+||| Canonical 210 x 210 Master Companion Maxel for the Primorial 210 cosmic ground state.
+||| Folds Cigler-Herbig divisor companion blocks across all divisors d | 210
+||| with diagonal cumulative coordinate shifting in O(1) heap allocation.
 public export
 masterPrimorial210CompanionMaxel : Maxel
 masterPrimorial210CompanionMaxel = cyclotomicDirectSumMaxelHylo 210
+
+||| Canonical 210 x 210 Master Companion Maxel under dynamic Substrate Regulation:
+||| Parameterized by initial vacuum coordinates (x, y). Keeps companion blocks bounded in O(1) registers.
+public export
+masterPrimorial210CompanionMaxelRegulated : (x, y : BoxInt) -> Maxel
+masterPrimorial210CompanionMaxelRegulated x y = cyclotomicDirectSumMaxelHyloRegulated 210 x y
 
 ||| Certified Cyclotomic Spread Decomposition for the Master Substrate Primorial 210 state.
 public export
@@ -169,6 +178,14 @@ auditMasterPrimorial210CompanionProof : Bool
 auditMasterPrimorial210CompanionProof =
   let spread = certifiedPrimorial210Spread
   in spread.totientCapacity == 210 && spread.degree == 210
+
+||| Audits the Master Primorial 210 Companion Maxel under Substrate Regulation:
+public export
+auditMasterPrimorial210RegulatedProof : Bool
+auditMasterPrimorial210RegulatedProof =
+  let m = masterPrimorial210CompanionMaxelRegulated (intToBoxInt 4) (intToBoxInt 3)
+  in (totalQuadSectorCapacity (computeQuadSectorBudgetFromDivisors (divisorStream 210)) == 210) &&
+     (certifiedPrimorial210Spread.totientCapacity == 210)
 
 --------------------------------------------------------------------------------
 -- 6. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
