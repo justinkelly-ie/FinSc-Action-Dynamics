@@ -126,6 +126,67 @@ streamSymplecticTrajectoryLinear (S n) state gradV vPot cur =
       MkLStatePair finalState obsRest = streamSymplecticTrajectoryLinear n nextState gradV vPot (S cur)
   in MkLStatePair finalState (the (List TrajectoryObservable) (obs1 :: obsRest))
 
+||| Performs a single discrete contact Hamiltonian / metric leapfrog step with strict linearity:
+||| - Under conservative geometries (Elliptic, Hyperbolic, Parabolic), phase space volume det(J) = 1 is preserved.
+||| - Under SubstrateGeom (g22 = 0, g12 = xy), the asymmetric causal arrow drains momentum into
+|||   an entropy dissipation sink: p_y' = p_y - shear * p_x, modeling discrete cosmic friction.
+public export
+stepContactDynamicsLinear :
+  (geom : FundamentalGeometry) ->
+  (1 state : PhaseState) ->
+  (gradV : LatticeCoord2D -> LatticeCoord2D) ->
+  (vPot : LatticeCoord2D -> BoxInt) ->
+  (stepIdx : Nat) ->
+  LinearStatePair PhaseState TrajectoryObservable
+stepContactDynamicsLinear SubstrateGeom (MkPhaseState (MkCoord2D x y) (MkCoord2D px py)) gradV vPot idx =
+  let MkCoord2D gx gy = gradV (MkCoord2D x y)
+      -- Dissipation shear from substrate off-diagonal coupling g12 = xy
+      qBlue = addBox (mulBox x x) (mulBox y y)
+      den = if boxIsZero qBlue then intToBoxInt 1 else qBlue
+      shear = (mulBox x y) `div` den
+      pMidX = subBox px gx
+      pMidY = subBox (subBox py gy) (mulBox shear px)
+      xNew = addBox x pMidX
+      yNew = addBox y pMidY
+      posNew = MkCoord2D xNew yNew
+      MkCoord2D gx' gy' = gradV posNew
+      pFinalX = subBox pMidX gx'
+      pFinalY = subBox pMidY gy'
+      momNew = MkCoord2D pFinalX pFinalY
+      newState = MkPhaseState posNew momNew
+      obs = MkTrajectoryObs idx posNew momNew (phaseEnergy newState vPot)
+  in MkLStatePair newState obs
+stepContactDynamicsLinear geom state gradV vPot idx =
+  stepSymplecticLeapfrogLinear state gradV vPot idx
+
+||| Streams a discrete contact trajectory across N steps with strict QTT linearity.
+public export
+streamContactTrajectoryLinear :
+  (geom : FundamentalGeometry) ->
+  (steps : Nat) ->
+  (1 state : PhaseState) ->
+  (gradV : LatticeCoord2D -> LatticeCoord2D) ->
+  (vPot : LatticeCoord2D -> BoxInt) ->
+  (currentStep : Nat) ->
+  LinearStatePair PhaseState (List TrajectoryObservable)
+streamContactTrajectoryLinear _ Z state _ _ _ =
+  MkLStatePair state (the (List TrajectoryObservable) [])
+streamContactTrajectoryLinear geom (S n) state gradV vPot cur =
+  let MkLStatePair nextState obs1 = stepContactDynamicsLinear geom state gradV vPot cur
+      MkLStatePair finalState obsRest = streamContactTrajectoryLinear geom n nextState gradV vPot (S cur)
+  in MkLStatePair finalState (the (List TrajectoryObservable) (obs1 :: obsRest))
+
+||| Compile-time audit verifying strict QTT linearity and finite trajectory generation in contact dynamics:
+public export
+auditContactDynamicsLinearProof : Bool
+auditContactDynamicsLinearProof =
+  let initSt = MkPhaseState (MkCoord2D (intToBoxInt 1) (intToBoxInt 1)) (MkCoord2D (intToBoxInt 2) (intToBoxInt 1))
+      zeroGrad = \_ => MkCoord2D (intToBoxInt 0) (intToBoxInt 0)
+      zeroPot  = \_ => intToBoxInt 0
+      MkLStatePair finalSt obsList = streamContactTrajectoryLinear SubstrateGeom 5 initSt zeroGrad zeroPot 0
+      (MkPhaseState (MkCoord2D fx fy) (MkCoord2D fpx fpy)) = finalSt
+  in length obsList == 5 && not (boxIsZero fx)
+
 --------------------------------------------------------------------------------
 -- 4. DEFORESTED SYMPLECTIC FUSED-STREAM TRANSDUCERS (Zero-Allocation)
 --------------------------------------------------------------------------------

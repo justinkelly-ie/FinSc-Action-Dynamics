@@ -69,6 +69,18 @@ discreteLagrangian geom (MkCoord2D x1 y1) (MkCoord2D x2 y2) vPot =
       vVal = vPot (MkCoord2D x1 y1)
   in tKin - vVal
 
+||| Dynamic Discrete Lagrangian evaluated with coordinate-parameterized metric tensors:
+||| L_dyn(x_k, x_{k+1}) = T_{g(x_k)}(Δx) - V(x_k).
+||| For SubstrateGeom, the causal shear is intrinsically contained in g_12(x_k) = x_k * y_k.
+public export
+discreteLagrangianDynamic : Stage1.FourGeometries.FundamentalGeometry -> LatticeCoord2D -> LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
+discreteLagrangianDynamic geom (MkCoord2D x1 y1) (MkCoord2D x2 y2) vPot =
+  let metric = geometryMetricDynamic geom x1 y1
+      diff = MkCoord2D (x2 - x1) (y2 - y1)
+      tKin = metricKineticQuadrance metric diff
+      vVal = vPot (MkCoord2D x1 y1)
+  in tKin - vVal
+
 ||| Computes the Discrete Action S[γ] along an ordered sequence of coordinates.
 %inline
 public export
@@ -77,6 +89,14 @@ discreteAction _ [] _ = Stage0.BoxInt.intToBoxInt 0
 discreteAction _ [x] _ = Stage0.BoxInt.intToBoxInt 0
 discreteAction geom (x0 :: x1 :: xs) vPot =
   discreteLagrangian geom x0 x1 vPot + discreteAction geom (x1 :: xs) vPot
+
+||| Computes dynamic action along an ordered sequence of coordinates using coordinate-parameterized metrics.
+public export
+discreteActionDynamic : Stage1.FourGeometries.FundamentalGeometry -> List LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
+discreteActionDynamic _ [] _ = Stage0.BoxInt.intToBoxInt 0
+discreteActionDynamic _ [x] _ = Stage0.BoxInt.intToBoxInt 0
+discreteActionDynamic geom (x0 :: x1 :: xs) vPot =
+  discreteLagrangianDynamic geom x0 x1 vPot + discreteActionDynamic geom (x1 :: xs) vPot
 
 ||| Deforested pairwise step transducer mapping a coordinate stream to adjacent pairs (x_k, x_{k+1}).
 public export
