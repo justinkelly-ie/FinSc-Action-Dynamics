@@ -10,6 +10,8 @@ import Stage1.MultisetDuality
 import Stage1.MultisetTensor
 import Stage1.MultisetTree
 import Stage1.SymmetricMetricTensor
+import Stage0.Token
+import Stage0.OnSeq.FusedStream
 import Data.List
 
 %default total
@@ -36,6 +38,20 @@ Eq GalacticProfile where
 public export
 enclosedMass : GalacticProfile -> (radius : Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
 enclosedMass (MkGalacticProfile m0 k) r = m0 + (k * r)
+
+||| Evaluates enclosed baryonic mass from a deforested stream of mass tokens in O(1) registers (Rule 04 §8):
+public export
+enclosedMassStream : BoxInt -> FusedStream (Token (CoordCell 1)) -> BoxInt
+enclosedMassStream radius strm =
+  foldStream (\acc, (MkToken c) =>
+    let r = natToBoxInt (coordAxis 0 c)
+    in if r <= radius then acc + intToBoxInt 1 else acc) (intToBoxInt 0) strm
+
+||| Evaluates total galactic mass from a deforested mass token stream:
+public export
+totalMassStream : FusedStream (Token (CoordCell 1)) -> BoxInt
+totalMassStream strm =
+  foldStream (\acc, _ => acc + intToBoxInt 1) (intToBoxInt 0) strm
 
 ||| Computes standard Newtonian circular velocity squared: v_N^2(r) = (G * M(r)) / r.
 public export
@@ -355,4 +371,17 @@ auditProject10Dto4DDirectProof =
       id4 = identitySquareMaxel 4
       rotSub10 = rotationVelocitySubstrate10D (intToBoxInt 4) (intToBoxInt 3) (MkGalacticProfile (intToBoxInt 100) (intToBoxInt 0)) (intToBoxInt 10)
   in (g4 == id4) && (rotSub10 > intToBoxInt 0)
+
+||| Verified Invariant: Single-pass deforested mass token streaming matches discrete counting (Rule 04 §8):
+public export
+auditGalacticMassStreamingProof : Bool
+auditGalacticMassStreamingProof =
+  let m = the (Multiset BoxInt (CoordCell 1))
+            (AddM (mkCell1 5) (intToBoxInt 1)
+              (AddM (mkCell1 15) (intToBoxInt 1)
+                (AddM (mkCell1 25) (intToBoxInt 1) ZeroM)))
+      strm = streamTokens m
+      mEnclosed = enclosedMassStream (intToBoxInt 15) strm
+      mTotal = totalMassStream (streamTokens m)
+  in (mEnclosed == intToBoxInt 2) && (mTotal == intToBoxInt 3)
 
