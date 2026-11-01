@@ -88,9 +88,9 @@ projectMetricBulkToLeaf bulkDim leafDim (MkSquareMaxel tree) =
   in MkSquareMaxel subTree
 
 ||| Projects a 10D spacetime metric down to the 4D physical spacetime leaf:
-||| pi_{10 -> 4} : BoxSquareMaxel 10 -> BoxSquareMaxel 4.
+||| pi_{10 -> 4} : SquareMaxel 10 -> SquareMaxel 4.
 public export
-project10Dto4D : BoxSquareMaxel 10 -> BoxSquareMaxel 4
+project10Dto4D : SquareMaxel 10 -> SquareMaxel 4
 project10Dto4D = projectMetricBulkToLeaf 10 4
 
 ||| Computes the uncompactified moduli degrees of freedom between bulk and leaf metrics:
@@ -256,9 +256,9 @@ auditGalacticRotationTimeSeriesProof = auditTullyFisherRelationProof
 public export
 auditProject10Dto4DIdentity : Bool
 auditProject10Dto4DIdentity =
-  let g10 = identityBoxSquareMaxel 10
+  let g10 = identitySquareMaxel 10
       g4  = project10Dto4D g10
-      id4 = identityBoxSquareMaxel 4
+      id4 = identitySquareMaxel 4
   in g4 == id4
 
 ||| Verified Invariant: Galactic rotation velocity curve driven by 10D moduli remains asymptotically flat.

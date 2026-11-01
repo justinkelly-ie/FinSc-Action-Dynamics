@@ -242,7 +242,7 @@ auditSpinorDensityPositivityProof =
 ||| A discrete 2-component polarization/relativistic spinor state vector.
 public export
 weylSpinorVexel : (u : BoxInt) -> (v : BoxInt) -> Vexel
-weylSpinorVexel u v = MkVexel [(MkUnixel 1, u), (MkUnixel 2, v)]
+weylSpinorVexel u v = singletonCell (mkUnixel 1) u <+> singletonCell (mkUnixel 2) v
 
 ||| Applies a dynamic Pythagorean spread boost/precession operator M(x, y) to a 2-spinor state:
 ||| M(x, y) = [[2 * Q_Red, -Q_Blue], [Q_Blue, 0]].
@@ -320,20 +320,13 @@ toDiracSpinor4 (MkDiracSpinor [p0, p1] [p2, p3]) =
         then MkPixel (boxToNat b) 0
         else MkPixel 0 (boxToNat (- b))
 
-||| Applies a 2x2 Dihedron matrix action on a 2-component vector:
-||| [v0', v1']^T = [[d00, d01], [d10, d11]] * [v0, v1]^T.
-public export
-actDihedronVect2 : DM.Dihedron2 -> Vect 2 BoxInt -> Vect 2 BoxInt
-actDihedronVect2 (DM.MkDihedron2 d00 d01 d10 d11) [v0, v1] =
-  [(d00 * v0) + (d01 * v1), (d10 * v0) + (d11 * v1)]
-
 ||| Applies an exact Dihedron Lorentz boost to a DiracSpinorMultiset:
 ||| Left chiral component transforms under D, right chiral component transforms under adjugate(D).
 public export
 boostDiracSpinor : DM.Dihedron2 -> DiracSpinorMultiset -> DiracSpinorMultiset
 boostDiracSpinor d (MkDiracSpinor left right) =
-  let left'  = actDihedronVect2 d left
-      right' = actDihedronVect2 (DM.adjugateDihedron2 d) right
+  let left'  = DM.actDihedronVect2 d left
+      right' = DM.actDihedronVect2 (DM.adjugateDihedron2 d) right
   in MkDiracSpinor left' right'
 
 ||| 2LTT Staged Spinor Matrix Unrolling:
@@ -362,36 +355,36 @@ auditDiracSpinorDensityStreamProof =
   in dDirect == intToBoxInt 30 && dStream == intToBoxInt 30 && idOk
 
 ------------------------------------------------------------------------
--- 8. SPARSE DIRAC GAMMA ALGEBRA (BoxSquareMaxel 4) & SPINOR CONTRACTION
+-- 8. SPARSE DIRAC GAMMA ALGEBRA (SquareMaxel 4) & SPINOR CONTRACTION
 ------------------------------------------------------------------------
 
-||| Dirac Gamma 0 Matrix as a sparse BoxSquareMaxel 4:
+||| Dirac Gamma 0 Matrix as a sparse SquareMaxel 4:
 ||| Supported on exactly 4 active non-zero diagonal entries: (1, 1, -1, -1).
 public export
-gamma0BoxSquareMaxel : BoxSquareMaxel 4
-gamma0BoxSquareMaxel =
+gamma0SquareMaxel : SquareMaxel 4
+gamma0SquareMaxel =
   let t0 = setBoxTree (MkPixel 0 0) (intToBoxInt 1) BoxLeaf
       t1 = setBoxTree (MkPixel 1 1) (intToBoxInt 1) t0
       t2 = setBoxTree (MkPixel 2 2) (intToBoxInt (-1)) t1
       t3 = setBoxTree (MkPixel 3 3) (intToBoxInt (-1)) t2
   in MkSquareMaxel t3
 
-||| Dirac Gamma 1 Matrix as a sparse BoxSquareMaxel 4:
+||| Dirac Gamma 1 Matrix as a sparse SquareMaxel 4:
 ||| Supported on exactly 4 active non-zero off-diagonal entries.
 public export
-gamma1BoxSquareMaxel : BoxSquareMaxel 4
-gamma1BoxSquareMaxel =
+gamma1SquareMaxel : SquareMaxel 4
+gamma1SquareMaxel =
   let t0 = setBoxTree (MkPixel 0 3) (intToBoxInt 1) BoxLeaf
       t1 = setBoxTree (MkPixel 1 2) (intToBoxInt 1) t0
       t2 = setBoxTree (MkPixel 2 1) (intToBoxInt (-1)) t1
       t3 = setBoxTree (MkPixel 3 0) (intToBoxInt (-1)) t2
   in MkSquareMaxel t3
 
-||| Dirac Gamma 3 Matrix as a sparse BoxSquareMaxel 4:
+||| Dirac Gamma 3 Matrix as a sparse SquareMaxel 4:
 ||| Supported on exactly 4 active non-zero off-diagonal entries.
 public export
-gamma3BoxSquareMaxel : BoxSquareMaxel 4
-gamma3BoxSquareMaxel =
+gamma3SquareMaxel : SquareMaxel 4
+gamma3SquareMaxel =
   let t0 = setBoxTree (MkPixel 0 2) (intToBoxInt 1) BoxLeaf
       t1 = setBoxTree (MkPixel 1 3) (intToBoxInt (-1)) t0
       t2 = setBoxTree (MkPixel 2 0) (intToBoxInt (-1)) t1
@@ -408,18 +401,18 @@ public export
 vexel4ToSpinor : VexelN 4 -> DiracSpinorMultiset
 vexel4ToSpinor (MkVexelN [v0, v1, v2, v3]) = MkDiracSpinor [v0, v1] [v2, v3]
 
-||| Contracts a sparse 4x4 BoxSquareMaxel matrix with a DiracSpinorMultiset in O(K + 4) steps.
+||| Contracts a sparse 4x4 SquareMaxel matrix with a DiracSpinorMultiset in O(K + 4) steps.
 public export
-contractGammaSpinor : BoxSquareMaxel 4 -> DiracSpinorMultiset -> DiracSpinorMultiset
-contractGammaSpinor g sp = vexel4ToSpinor (contractBoxSquareDense g (spinorToVexel4 sp))
+contractGammaSpinor : SquareMaxel 4 -> DiracSpinorMultiset -> DiracSpinorMultiset
+contractGammaSpinor g sp = vexel4ToSpinor (contractSquareMaxelDense g (spinorToVexel4 sp))
 
 ||| 2LTT Staged Sparse Gamma-Spinor Contraction:
-||| Quotes Level 0 contraction of a staged BoxSquareMaxel with a Dirac spinor.
+||| Quotes Level 0 contraction of a staged SquareMaxel with a Dirac spinor.
 public export
-stagedContractGammaSpinor : TTS.Lift (BoxSquareMaxel 4) -> DiracSpinorMultiset -> TTS.Code DiracSpinorMultiset
+stagedContractGammaSpinor : TTS.Lift (SquareMaxel 4) -> DiracSpinorMultiset -> TTS.Code DiracSpinorMultiset
 stagedContractGammaSpinor qg sp = TTS.quote (contractGammaSpinor (TTS.splice qg) sp)
 
-||| Invariant audit verifying the Clifford Dirac algebra on sparse BoxSquareMaxel:
+||| Invariant audit verifying the Clifford Dirac algebra on sparse SquareMaxel:
 ||| 1. (gamma0)^2 = I_4
 ||| 2. (gamma1)^2 = -I_4
 ||| 3. (gamma3)^2 = -I_4
@@ -430,22 +423,22 @@ stagedContractGammaSpinor qg sp = TTS.quote (contractGammaSpinor (TTS.splice qg)
 public export
 auditSparseDiracAlgebraProof : Bool
 auditSparseDiracAlgebraProof =
-  let g0 = gamma0BoxSquareMaxel
-      g1 = gamma1BoxSquareMaxel
-      g3 = gamma3BoxSquareMaxel
-      i4 = identityBoxSquareMaxel 4
-      negI4 = scaleBoxSquareMaxel (intToBoxInt (-1)) i4
-      zeroMat : BoxSquareMaxel 4 = MkSquareMaxel BoxLeaf
+  let g0 = gamma0SquareMaxel
+      g1 = gamma1SquareMaxel
+      g3 = gamma3SquareMaxel
+      i4 = identitySquareMaxel 4
+      negI4 = scaleSquareMaxel (intToBoxInt (-1)) i4
+      zeroMat : SquareMaxel 4 = MkSquareMaxel BoxLeaf
       
       -- Metric signature (+, -, -, -)
-      relG0 = mulBoxSquareMaxel g0 g0 == i4
-      relG1 = mulBoxSquareMaxel g1 g1 == negI4
-      relG3 = mulBoxSquareMaxel g3 g3 == negI4
+      relG0 = mulSquareMaxel g0 g0 == i4
+      relG1 = mulSquareMaxel g1 g1 == negI4
+      relG3 = mulSquareMaxel g3 g3 == negI4
       
       -- Anticommutation {gamma^mu, gamma^nu} = 0
-      anti01 = addBoxSquareMaxel (mulBoxSquareMaxel g0 g1) (mulBoxSquareMaxel g1 g0) == zeroMat
-      anti03 = addBoxSquareMaxel (mulBoxSquareMaxel g0 g3) (mulBoxSquareMaxel g3 g0) == zeroMat
-      anti13 = addBoxSquareMaxel (mulBoxSquareMaxel g1 g3) (mulBoxSquareMaxel g3 g1) == zeroMat
+      anti01 = addSquareMaxel (mulSquareMaxel g0 g1) (mulSquareMaxel g1 g0) == zeroMat
+      anti03 = addSquareMaxel (mulSquareMaxel g0 g3) (mulSquareMaxel g3 g0) == zeroMat
+      anti13 = addSquareMaxel (mulSquareMaxel g1 g3) (mulSquareMaxel g3 g1) == zeroMat
       
       -- Spinor contraction density preservation under gamma0
       testSpinor = MkDiracSpinor [intToBoxInt 1, intToBoxInt 2] [intToBoxInt 3, intToBoxInt 4]
