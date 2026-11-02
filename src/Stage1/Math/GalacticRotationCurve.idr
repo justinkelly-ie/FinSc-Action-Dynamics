@@ -283,6 +283,35 @@ rotationVelocitySubstrate10D x y gal r =
       slope = substrateDragSlopeScaled x y
   in emergentRotationVelocitySquared g slope gal r
 
+||| Evaluates dynamic rotation velocity squared from active halo multiset:
+||| v_halo^2(r) = (G * (M_baryon(r) + M_halo(r)) * (1 + dragSlope * r)) / r
+public export
+emergentRotationVelocityHalo : (gConst : BoxInt) -> (dragSlope : BoxInt) ->
+                               GalacticProfile -> GalacticHaloMultiset -> (radius : BoxInt) -> BoxInt
+emergentRotationVelocityHalo g slope gal halo r =
+  let mBaryon = enclosedMass gal r
+      mHalo   = enclosedPhaseMassStream r (streamTokens halo)
+      mTotal  = addBox mBaryon mHalo
+      rVal    = if boxIsZero r then intToBoxInt 1 else r
+      dragFactor = intToBoxInt 1 + (slope * rVal)
+  in (g * mTotal * dragFactor) `div` rVal
+
+||| Computes dynamic halo rotation velocity driven directly by Substrate metric shear:
+public export
+emergentRotationVelocityHaloSubstrate : (gConst : BoxInt) -> (x, y : BoxInt) ->
+                                        GalacticProfile -> GalacticHaloMultiset -> (radius : BoxInt) -> BoxInt
+emergentRotationVelocityHaloSubstrate g x y gal halo r =
+  let slope = substrateDragSlopeScaled x y
+  in emergentRotationVelocityHalo g slope gal halo r
+
+||| Computes dynamic halo rotation velocity in 10D bulk:
+public export
+rotationVelocityHaloSubstrate10D : (x, y : BoxInt) -> GalacticProfile -> GalacticHaloMultiset -> (radius : BoxInt) -> BoxInt
+rotationVelocityHaloSubstrate10D x y gal halo r =
+  let g = intToBoxInt 100
+  in emergentRotationVelocityHaloSubstrate g x y gal halo r
+
+
 ------------------------------------------------------------------------
 -- 2. TIME-SERIES GALACTIC ROTATION & DARK MATTER HALO SIMULATOR
 ------------------------------------------------------------------------
