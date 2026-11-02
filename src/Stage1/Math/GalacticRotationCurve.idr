@@ -70,6 +70,19 @@ Eq PhasePoint where
   (MkPhasePoint r1 v1 m1) == (MkPhasePoint r2 v2 m2) =
     (r1 == r2) && (v1 == v2) && (m1 == m2)
 
+public export
+Ord PhasePoint where
+  compare (MkPhasePoint r1 v1 m1) (MkPhasePoint r2 v2 m2) =
+    case compare r1 r2 of
+      EQ => case compare v1 v2 of
+              EQ => compare m1 m2
+              res => res
+      res => res
+
+public export
+Show PhasePoint where
+  show (MkPhasePoint r v m) = "P(" ++ show (unwrapBox r) ++ "," ++ show (unwrapBox v) ++ "," ++ show (unwrapBox m) ++ ")"
+
 ||| A galactic halo represented as a constructive multiset of phase-space quanta:
 public export
 GalacticHaloMultiset : Type
@@ -97,6 +110,27 @@ symplecticLeapfrogTokenStep g (MkLToken (MkPhasePoint r v m)) =
       newV = subBox v accel
       newR = addBox r newV
   in MkLToken (MkPhasePoint newR newV m)
+
+||| Non-linear wrapper for symplectic leapfrog phase point update:
+public export
+stepPhasePointNonLinear : BoxInt -> PhasePoint -> PhasePoint
+stepPhasePointNonLinear g pt =
+  let MkLToken nextPt = symplecticLeapfrogTokenStep g (MkLToken pt)
+  in nextPt
+
+||| Updates an entire galactic halo multiset under central gravitational acceleration g:
+public export
+stepGalacticHaloMass : BoxInt -> GalacticHaloMultiset -> GalacticHaloMultiset
+stepGalacticHaloMass g ZeroM = ZeroM
+stepGalacticHaloMass g (AddM pt w rest) =
+  AddM (stepPhasePointNonLinear g pt) w (stepGalacticHaloMass g rest)
+
+||| Canonical 2-point galactic halo multiset:
+public export
+canonicalGalacticHalo : GalacticHaloMultiset
+canonicalGalacticHalo =
+  AddM (MkPhasePoint (MkBoxInt 5) (MkBoxInt 20) (MkBoxInt 50)) (MkBoxInt 1)
+  (AddM (MkPhasePoint (MkBoxInt 15) (MkBoxInt 22) (MkBoxInt 50)) (MkBoxInt 1) ZeroM)
 
 ------------------------------------------------------------------------
 -- 1c. NEWTONIAN & EMERGENT ROTATION VELOCITY PROFILES
