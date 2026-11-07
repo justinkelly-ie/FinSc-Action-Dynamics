@@ -83,6 +83,40 @@ auditRenormalizationInformationFlowProof =
      numDg == Stage0.BoxInt.intToBoxInt (-1) &&
      numFish == Stage0.BoxInt.intToBoxInt 16
 
+public export
+auditDiscreteBetaFlowProof : Bool
+auditDiscreteBetaFlowProof =
+  let g0 = mkUnixelFraction (Stage0.BoxInt.intToBoxInt 1) 1
+      dg = discreteBetaStep g0 1
+  in dg.num == Stage0.BoxInt.intToBoxInt (-1) && denominatorNat dg == 2
+
+public export
+auditDiscreteFisherMetricProof : Bool
+auditDiscreteFisherMetricProof =
+  let fq = discreteFisherQuadrance 10 6
+  in fq.num == Stage0.BoxInt.intToBoxInt 16 && denominatorNat fq == 10
+
+public export
+auditTopologicalRGFixedPointProof : Bool
+auditTopologicalRGFixedPointProof =
+  let cCoarse = decimateBerryCurvature [Stage0.BoxInt.intToBoxInt 1, Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 0]
+  in cCoarse == Stage0.BoxInt.intToBoxInt 1
+
+public export
+auditPlaquetteDecimationProof : Bool
+auditPlaquetteDecimationProof =
+  let plaquettes = [Stage0.BoxInt.intToBoxInt 2, Stage0.BoxInt.intToBoxInt 3, Stage0.BoxInt.intToBoxInt (-1), Stage0.BoxInt.intToBoxInt 1]
+      coarse = decimateBerryCurvature plaquettes
+  in coarse == Stage0.BoxInt.intToBoxInt 5
+
+public export
+auditMultiBlockTopologicalFixedPointProof : Bool
+auditMultiBlockTopologicalFixedPointProof =
+  let block1 = decimateBerryCurvature [Stage0.BoxInt.intToBoxInt 1, Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 0]
+      block2 = decimateBerryCurvature [Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 1, Stage0.BoxInt.intToBoxInt 0, Stage0.BoxInt.intToBoxInt 0]
+      macroBlock = decimateBerryCurvature [block1, block2]
+  in macroBlock == Stage0.BoxInt.intToBoxInt 2
+
 ------------------------------------------------------------------------
 -- 5. CATEGORY-THEORETIC MULTISET ADJUNCTION
 ------------------------------------------------------------------------

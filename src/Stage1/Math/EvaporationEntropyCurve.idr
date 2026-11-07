@@ -163,4 +163,15 @@ public export
                                pageCurveHomTensorInv (pageCurveHomTensorIso t) = t
 prfEvaporationEntropyCurve = proofPageCurveHomIso
 
+||| Audits Discrete Page Curve unitarity, initial and final zero entropy, and Page time peak (Law 21).
+public export
+auditEvaporationEntropyCurveProof : Bool
+auditEvaporationEntropyCurveProof =
+  let totalB = 100
+      s0 = discretePageEntropy 0 totalB
+      sMid = discretePageEntropy (pageTime totalB) totalB
+      sEnd = discretePageEntropy totalB totalB
+  in s0 == 0 && sMid == 50 && sEnd == 0 && isUnitaryPageEvaporation totalB
+
+
 

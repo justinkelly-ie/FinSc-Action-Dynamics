@@ -96,6 +96,23 @@ auditSakharovBaryogenesisProof =
       outOfEq = satisfiesOutOfEquilibrium (Stage0.BoxInt.intToBoxInt 0)
   in bViolation && cpViolation && outOfEq
 
+public export
+auditBaryonNumberAsymmetryPositiveProof : Bool
+auditBaryonNumberAsymmetryPositiveProof =
+  let st = MkBaryonState (Stage0.BoxInt.intToBoxInt 10) (Stage0.BoxInt.intToBoxInt 3) (Stage0.BoxInt.intToBoxInt 100)
+  in netBaryonNumber st > Stage0.BoxInt.intToBoxInt 0
+
+public export
+auditCPViolationSeedAsymmetryProof : Bool
+auditCPViolationSeedAsymmetryProof =
+  let st = MkBaryonState (Stage0.BoxInt.intToBoxInt 10) (Stage0.BoxInt.intToBoxInt 3) (Stage0.BoxInt.intToBoxInt 100)
+  in satisfiesCPViolation st
+
+public export
+auditSubstrateThermalDepartureProof : Bool
+auditSubstrateThermalDepartureProof =
+  satisfiesOutOfEquilibrium (Stage0.BoxInt.intToBoxInt 0)
+
 --------------------------------------------------------------------------------
 -- 4. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
 --------------------------------------------------------------------------------

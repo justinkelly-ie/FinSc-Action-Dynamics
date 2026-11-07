@@ -164,6 +164,12 @@ auditRGDecimatorProof =
      totalFlux macroP == Stage0.BoxInt.intToBoxInt 10 &&
      vectSum vOut == 16
 
+||| Audits Doubly Stochastic Magic Maxel RG Decimation Kernel (Witness 122).
+public export
+auditRGMagicMaxelDecimationProof : Bool
+auditRGMagicMaxelDecimationProof =
+  isMagicMaxel rgDecimationMagicMaxel 4 && auditRGDecimatorProof
+
 ------------------------------------------------------------------------
 -- 7. CATEGORY-THEORETIC MULTISET ADJUNCTION
 ------------------------------------------------------------------------

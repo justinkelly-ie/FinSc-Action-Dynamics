@@ -88,6 +88,15 @@ public export
 0 prfOscillatingReactions : (s : BZState) -> simulateBZEpochs Z s = s
 prfOscillatingReactions s = Refl
 
+||| Audits Discrete Oregonator reaction step: activator surge, inhibitor depletion, and catalyst feedback (Law 31).
+public export
+auditOscillatingReactionsProof : Bool
+auditOscillatingReactionsProof =
+  let s0 = MkBZState (intToBoxInt 5) (intToBoxInt 2) (intToBoxInt 0)
+      s1 = stepBZReaction s0
+  in s1.activatorX == intToBoxInt 25 && s1.inhibitorY == intToBoxInt 2 && s1.catalystZ == intToBoxInt 0
+
+
 ------------------------------------------------------------------------
 -- 4. CATEGORY-THEORETIC MULTISET ADJUNCTION
 ------------------------------------------------------------------------

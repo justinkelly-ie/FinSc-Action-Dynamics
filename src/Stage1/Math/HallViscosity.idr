@@ -131,3 +131,13 @@ public export
                      hallViscosityHomTensorInv (hallViscosityHomTensorIso t) = t
 prfHallViscosity = proofHallViscosityHomIso
 
+||| Audits Discrete Hall Viscosity and dissipationless anti-symmetric stress tensor (Law 20).
+public export
+auditHallViscosityProof : Bool
+auditHallViscosityProof =
+  let s = Stage0.BoxInt.intToBoxInt 2
+      nu = Stage1.UnixelFraction.mkUnixelFraction (Stage0.BoxInt.intToBoxInt 1) 3
+      eta = discreteHallViscosity s nu
+  in eta.num == Stage0.BoxInt.intToBoxInt 2 && denominatorNat eta == 12 && isDissipationlessHallStress eta
+
+

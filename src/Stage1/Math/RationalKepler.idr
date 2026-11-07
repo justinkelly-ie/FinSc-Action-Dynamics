@@ -126,4 +126,9 @@ auditRationalKeplerProof =
       a = Stage0.BoxInt.intToBoxInt 4
   in isKeplerStableOrbit t a
 
+||| Alias for Witness 123
+public export
+auditRationalKeplerLawsProof : Bool
+auditRationalKeplerLawsProof = auditRationalKeplerProof
+
 

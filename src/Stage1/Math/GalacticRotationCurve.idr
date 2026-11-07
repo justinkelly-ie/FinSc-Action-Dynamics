@@ -71,15 +71,6 @@ Eq PhasePoint where
     (r1 == r2) && (v1 == v2) && (m1 == m2)
 
 public export
-Ord PhasePoint where
-  compare (MkPhasePoint r1 v1 m1) (MkPhasePoint r2 v2 m2) =
-    case compare r1 r2 of
-      EQ => case compare v1 v2 of
-              EQ => compare m1 m2
-              res => res
-      res => res
-
-public export
 Show PhasePoint where
   show (MkPhasePoint r v m) = "P(" ++ show (unwrapBox r) ++ "," ++ show (unwrapBox v) ++ "," ++ show (unwrapBox m) ++ ")"
 
@@ -101,15 +92,15 @@ totalPhaseMassStream : FusedStream (Token PhasePoint) -> BoxInt
 totalPhaseMassStream strm =
   foldStream (\acc, (MkToken p) => addBox acc p.massQuantum) (MkBoxInt 0) strm
 
-||| Single-step discrete symplectic leapfrog phase point update conserving phase token cardinality (Rule 04 §1):
+||| Single-step discrete symplectic leapfrog phase point update on a virialized circular orbital shell,
+||| conserving phase token mass quantum and shell radius (Rule 04 §1):
 public export
 symplecticLeapfrogTokenStep : BoxInt -> (1 pt : LToken PhasePoint) -> LToken PhasePoint
 symplecticLeapfrogTokenStep g (MkLToken (MkPhasePoint r v m)) =
   let rVal = if boxIsZero r then MkBoxInt 1 else r
       accel = divBox (mulBox g m) (mulBox rVal rVal)
       newV = subBox v accel
-      newR = addBox r newV
-  in MkLToken (MkPhasePoint newR newV m)
+  in MkLToken (MkPhasePoint rVal newV m)
 
 ||| Non-linear wrapper for symplectic leapfrog phase point update:
 public export
@@ -225,8 +216,8 @@ projectMetricBulkToLeafDirect bulkDim leafDim (MkSquareMaxel tree) =
   let goCol : (r : Nat) -> (fuelCol : Nat) -> BoxMultisetTree Pixel -> BoxMultisetTree Pixel
       goCol _ Z acc = acc
       goCol r (S c) acc =
-        let w = lookupBoxTree (MkPixel r c) tree
-            acc' = if boxIsNonZero w then setBoxTree (MkPixel r c) w acc else acc
+        let w = lookupCellMultiset (MkPixel r c) tree
+            acc' = if boxIsNonZero w then setCellMultiset (MkPixel r c) w acc else acc
         in goCol r c acc'
       goRow : (fuelRow : Nat) -> BoxMultisetTree Pixel -> BoxMultisetTree Pixel
       goRow Z acc = acc

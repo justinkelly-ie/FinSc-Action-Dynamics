@@ -465,10 +465,10 @@ auditDiracSpinorDensityStreamProof =
 public export
 gamma0SquareMaxel : SquareMaxel 4
 gamma0SquareMaxel =
-  let t0 = setBoxTree (MkPixel 0 0) (intToBoxInt 1) BoxLeaf
-      t1 = setBoxTree (MkPixel 1 1) (intToBoxInt 1) t0
-      t2 = setBoxTree (MkPixel 2 2) (intToBoxInt (-1)) t1
-      t3 = setBoxTree (MkPixel 3 3) (intToBoxInt (-1)) t2
+  let t0 = setCellMultiset (MkPixel 0 0) (intToBoxInt 1) BoxLeaf
+      t1 = setCellMultiset (MkPixel 1 1) (intToBoxInt 1) t0
+      t2 = setCellMultiset (MkPixel 2 2) (intToBoxInt (-1)) t1
+      t3 = setCellMultiset (MkPixel 3 3) (intToBoxInt (-1)) t2
   in MkSquareMaxel t3
 
 ||| Dirac Gamma 1 Matrix as a sparse SquareMaxel 4:
@@ -476,10 +476,10 @@ gamma0SquareMaxel =
 public export
 gamma1SquareMaxel : SquareMaxel 4
 gamma1SquareMaxel =
-  let t0 = setBoxTree (MkPixel 0 3) (intToBoxInt 1) BoxLeaf
-      t1 = setBoxTree (MkPixel 1 2) (intToBoxInt 1) t0
-      t2 = setBoxTree (MkPixel 2 1) (intToBoxInt (-1)) t1
-      t3 = setBoxTree (MkPixel 3 0) (intToBoxInt (-1)) t2
+  let t0 = setCellMultiset (MkPixel 0 3) (intToBoxInt 1) BoxLeaf
+      t1 = setCellMultiset (MkPixel 1 2) (intToBoxInt 1) t0
+      t2 = setCellMultiset (MkPixel 2 1) (intToBoxInt (-1)) t1
+      t3 = setCellMultiset (MkPixel 3 0) (intToBoxInt (-1)) t2
   in MkSquareMaxel t3
 
 ||| Dirac Gamma 3 Matrix as a sparse SquareMaxel 4:
@@ -487,10 +487,10 @@ gamma1SquareMaxel =
 public export
 gamma3SquareMaxel : SquareMaxel 4
 gamma3SquareMaxel =
-  let t0 = setBoxTree (MkPixel 0 2) (intToBoxInt 1) BoxLeaf
-      t1 = setBoxTree (MkPixel 1 3) (intToBoxInt (-1)) t0
-      t2 = setBoxTree (MkPixel 2 0) (intToBoxInt (-1)) t1
-      t3 = setBoxTree (MkPixel 3 1) (intToBoxInt 1) t2
+  let t0 = setCellMultiset (MkPixel 0 2) (intToBoxInt 1) BoxLeaf
+      t1 = setCellMultiset (MkPixel 1 3) (intToBoxInt (-1)) t0
+      t2 = setCellMultiset (MkPixel 2 0) (intToBoxInt (-1)) t1
+      t3 = setCellMultiset (MkPixel 3 1) (intToBoxInt 1) t2
   in MkSquareMaxel t3
 
 ||| Converts DiracSpinorMultiset to a dimensioned VexelN 4 for contraction.

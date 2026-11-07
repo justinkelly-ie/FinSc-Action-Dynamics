@@ -123,3 +123,14 @@ public export
                         bohmianPotentialHomTensorInv (bohmianPotentialHomTensorIso t) = t
 prfQuantumPotential = proofBohmianPotentialHomIso
 
+||| Audits Discrete Bohmian Quantum Potential and total energy along causal trajectories (Law 27).
+public export
+auditQuantumPotentialProof : Bool
+auditQuantumPotentialProof =
+  let lapR = intToBoxInt 4
+      r = 2
+      q = discreteQuantumPotential lapR r
+      eTotal = bohmianTotalEnergy (intToBoxInt 10) (intToBoxInt 5) (intToBoxInt (-1))
+  in q.num == intToBoxInt (-4) && denominatorNat q == 4 && eTotal == intToBoxInt 14
+
+

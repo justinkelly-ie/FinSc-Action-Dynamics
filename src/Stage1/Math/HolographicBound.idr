@@ -12,6 +12,7 @@ import Stage1.MultisetDuality
 import Stage1.MultisetTensor
 import Stage1.FourGeometries
 import Stage1.TypeTheory.Smoothness
+import Stage1.Math.PrefixCodeOptimality
 import Data.List
 
 %default total
@@ -124,15 +125,6 @@ auditCosmicBudgetHolographicClosureProof =
       budget = Stage1.FourGeometries.primorial210Budget
   in totalHoloCap == expectedHolo && totalHoloCap >= budget
 
-public export
-contourWalk : BoxSpec -> List Bool
-contourWalk LeafSpec = []
-contourWalk (NodeSpec n) = replicate (2 * n) True
-
-public export
-isDyckPath : List Bool -> Bool
-isDyckPath _ = True
-
 ||| Audits the Dyck Contour Walk Holographic Bound:
 ||| The contour bitstring length of a 108-box bounding container satisfies
 ||| length(W(B)) = 2 * 108 = 216 <= 4 * Area(dV) = 216,
@@ -140,13 +132,15 @@ isDyckPath _ = True
 public export
 auditHolographicDyckWalkBoundProof : Bool
 auditHolographicDyckWalkBoundProof =
-  let boundingBox = fromNatBoxSpec 107
+  let boundingBox = fromNatBoxSpec 108
       dyckBits = contourWalk boundingBox
       walkLen = length dyckBits
       maxHoloBits = multiSectorHolographicCapacity 3
   in walkLen == 216 &&
      walkLen <= maxHoloBits &&
-     isDyckPath dyckBits
+     isDyckPath dyckBits &&
+     not (isDyckPath [False, True]) &&
+     not (isDyckPath [True])
 
 ------------------------------------------------------------------------
 -- 3. CATEGORY-THEORETIC MULTISET ADJUNCTION

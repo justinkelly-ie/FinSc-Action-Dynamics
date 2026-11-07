@@ -65,7 +65,7 @@ stepPoyntingEnergyQuadStream : QuadStreamMultiset BoxInt -> DiscreteEMCell -> Qu
 stepPoyntingEnergyQuadStream (MkQuadStream e h p s) cell =
   let stepStream : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
       stepStream ZeroM = ZeroM
-      stepStream (AddM v w rest) = AddM (stepPoyntingEnergy (MkDiscreteEMCell v v (poyntingFluxOut cell) (jouleWork cell))) w (stepStream rest)
+      stepStream (AddM v w rest) = AddM v (stepPoyntingEnergy (MkDiscreteEMCell w w (poyntingFluxOut cell) (jouleWork cell))) (stepStream rest)
   in MkQuadStream (stepStream e) (stepStream h) (stepStream p) (stepStream s)
 
 ||| Verifies local discrete Poynting conservation:
@@ -94,10 +94,10 @@ auditLocalPoyntingBalanceProof =
       u0 = electromagneticEnergyDensity (MkDiscreteEMCell (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 15) (Stage0.BoxInt.intToBoxInt 5))
       u1 = stepPoyntingEnergy (MkDiscreteEMCell (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 15) (Stage0.BoxInt.intToBoxInt 5))
       
-      e = AddM (intToBoxInt 50) (intToBoxInt 1) ZeroM
-      h = AddM (intToBoxInt 50) (intToBoxInt 1) ZeroM
-      p = AddM (intToBoxInt 50) (intToBoxInt 1) ZeroM
-      s = AddM (intToBoxInt 50) (intToBoxInt 1) ZeroM
+      e = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
+      h = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
+      p = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
+      s = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
       qs = MkQuadStream e h p s
       qsStepped = stepPoyntingEnergyQuadStream qs cell
   in u0 == Stage0.BoxInt.intToBoxInt 100 &&

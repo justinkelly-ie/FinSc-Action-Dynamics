@@ -150,4 +150,14 @@ public export
                                 laughlinHomTensorInv (laughlinHomTensorIso t) = t
 prfFractionalHallConductance = proofLaughlinHomIso
 
+||| Audits Fractional Quantum Hall Conductance, charge fractionalization, and anyonic braiding phase (Law 14).
+public export
+auditFractionalHallConductanceProof : Bool
+auditFractionalHallConductanceProof =
+  let st = MkLaughlinState 1 3
+      cond = fractionalHallConductance st
+      period = anyonicExchangePeriod st
+  in cond.num == intToBoxInt 1 && denominatorNat cond == 3 && period == 6
+
+
 

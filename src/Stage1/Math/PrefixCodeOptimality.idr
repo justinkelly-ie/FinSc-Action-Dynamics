@@ -103,18 +103,33 @@ auditCyclotomicKolmogorovMinimalityProof =
 -- 3. DYCK-HUFFMAN CODES & HOLOGRAPHIC TRANSMISSION (CH. 25 & 27)
 ------------------------------------------------------------------------
 
+||| Dyck contour walk of a box with n units: n up-steps (True) followed by n down-steps (False).
 public export
 contourWalk : BoxSpec -> List Bool
 contourWalk LeafSpec = []
-contourWalk (NodeSpec n) = replicate (2 * n) True
+contourWalk (NodeSpec n) = replicate n True ++ replicate n False
 
+||| Prefix-balance scanner: True is an up-step, False a down-step.
+||| Fails if the running height would ever go negative; returns the final height.
+public export
+dyckHeight : (height : Nat) -> List Bool -> Maybe Nat
+dyckHeight h []           = Just h
+dyckHeight h (True :: bs) = dyckHeight (S h) bs
+dyckHeight Z (False :: _) = Nothing
+dyckHeight (S h) (False :: bs) = dyckHeight h bs
+
+||| A Dyck path never dips below zero (prefix non-negativity) and ends at height zero (terminal balance).
 public export
 isDyckPath : List Bool -> Bool
-isDyckPath _ = True
+isDyckPath bits = case dyckHeight 0 bits of
+                    Just Z => True
+                    _      => False
 
+||| Decodes a Dyck contour walk back to its box; rejects malformed walks.
 public export
 fromContourWalk : List Bool -> Maybe BoxSpec
-fromContourWalk bits = Just (NodeSpec (length bits `div` 2))
+fromContourWalk bits =
+  if isDyckPath bits then Just (NodeSpec (length bits `div` 2)) else Nothing
 
 ||| Evaluates the Dyck path bitstream of a BoxSpec tree:
 public export

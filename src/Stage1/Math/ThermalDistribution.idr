@@ -41,24 +41,7 @@ Show EnergyLevel where
   show (MkEnergyLevel e w) =
     "Level(E=" ++ show e ++ ", w=" ++ show w ++ ")"
 
-||| Logarithmic fast binary natural power b^e via repeated squaring (Rule 04).
-||| Computes exact natural exponentiation in O(log e) steps using structural fuel.
-public export
-fastNatPower : Nat -> Nat -> Nat
-fastNatPower _ Z = 1
-fastNatPower b (S Z) = b
-fastNatPower b exp = loop exp b 1 (S exp)
-  where
-    loop : Nat -> Nat -> Nat -> Nat -> Nat
-    loop _ _ acc Z = acc
-    loop Z _ acc _ = acc
-    loop e base acc (S fuel) =
-      let (e', isOdd) = natHalfAndOdd e
-          acc' = if isOdd then acc * base else acc
-          base' = base * base
-      in loop e' base' acc' fuel
-
-||| Backward-compatible alias for fast logarithmic natural power.
+||| Backward-compatible alias for fast logarithmic natural power (re-exported from Stage1.Order.Preorder).
 public export
 natPower : Nat -> Nat -> Nat
 natPower = fastNatPower
@@ -316,6 +299,24 @@ auditThermalDistributionProof =
   in auditStreamPartitionEquivalenceProof &&
      boxEq zStream1 zPoly1 &&
      boxEq zStream0 zPoly0
+
+||| Audits that discrete Boltzmann probabilities sum to 1 over the state ladder (total probability normalization).
+public export
+auditBoltzmannProbabilityNormalizationProof : Bool
+auditBoltzmannProbabilityNormalizationProof =
+  let maxLevel = 2
+      numQ = 1
+      denQ = 2
+      spectrum = ellipticLadder
+      probs = map (\lvl => discreteBoltzmannProbability lvl spectrum maxLevel numQ denQ) spectrum
+      numSum = foldl (\acc, (n, _) => acc + n) (the Nat 0) probs
+      den = scaledPartitionSum spectrum maxLevel numQ denQ
+  in numSum == den && den > 0
+
+||| Audits Caret-FIA Boltzmann Partition Factorization & Cosmic Free Energy (Witness 120).
+public export
+auditCaretBoltzmannPartitionProof : Bool
+auditCaretBoltzmannPartitionProof = auditThermalDistributionProof
 
 ------------------------------------------------------------------------
 -- 5. CATEGORY-THEORETIC MULTISET ADJUNCTION
