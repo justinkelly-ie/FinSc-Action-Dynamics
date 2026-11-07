@@ -12,6 +12,7 @@ import Stage1.MultisetTree
 import Stage1.SymmetricMetricTensor
 import Stage0.Token
 import Stage0.OnSeq.FusedStream
+import Stage1.FourGeometries
 import Data.List
 
 %default total
@@ -172,7 +173,7 @@ substrateDragSlopeFraction x y =
 public export
 substrateDragSlopeScaled : (x, y : BoxInt) -> BoxInt
 substrateDragSlopeScaled x y =
-  let num = intToBoxInt 2 * (x * y) * intToBoxInt 210
+  let num = intToBoxInt 2 * (x * y) * natToBoxInt primorial210Budget
       den = (x * x) + (y * y)
       validDen = if boxIsZero den then intToBoxInt 1 else den
   in num `div` validDen
