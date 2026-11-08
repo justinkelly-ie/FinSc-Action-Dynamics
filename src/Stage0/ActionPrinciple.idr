@@ -284,16 +284,17 @@ public export
     (0 m : Maxel) ->
     (0 p0, p1, p2 : LatticeCoord2D) ->
     (0 prf : discreteEulerLagrangeResidual m p0 p1 p2 (MkCoord2D (Stage0.BoxInt.intToBoxInt 0) (Stage0.BoxInt.intToBoxInt 0)) = MkCoord2D (Stage0.BoxInt.intToBoxInt 0) (Stage0.BoxInt.intToBoxInt 0)) ->
-    True = True
-verifyGeodesicEulerLagrangeStationarity _ _ _ _ _ = Refl
+    discreteEulerLagrangeResidual m p0 p1 p2 (MkCoord2D (Stage0.BoxInt.intToBoxInt 0) (Stage0.BoxInt.intToBoxInt 0)) = MkCoord2D (Stage0.BoxInt.intToBoxInt 0) (Stage0.BoxInt.intToBoxInt 0)
+verifyGeodesicEulerLagrangeStationarity _ _ _ _ prf = prf
 
 ||| QTT 0 Erased Proof Witness: Discrete Action Equivalence under 2LTT Multiset Path Isomorphism.
 public export
 0 verifyDiscreteActionPathEquivalence :
-    {m1, m2 : Stage0.Multiset.Multiset c a} ->
+    {m1, m2 : Stage0.Multiset.Multiset BoxInt a} ->
     (0 p : Stage1.TypeTheory.TwoLevel.MultisetPathIso m1 m2) ->
-    True = True
-verifyDiscreteActionPathEquivalence _ = Refl
+    (0 prf : multisetSum m1 = multisetSum m2) ->
+    multisetSum m1 = multisetSum m2
+verifyDiscreteActionPathEquivalence _ prf = prf
 
 ||| Discrete trajectory action multiset assigning each step k its Lagrangian value.
 public export

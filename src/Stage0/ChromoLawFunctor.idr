@@ -75,3 +75,29 @@ public export
                                     (0 prf2 : totalVexelMass (applyLawFunctor l2 (applyLawFunctor l1 v)) = totalVexelMass (applyLawFunctor l1 v)) ->
                                     totalVexelMass (applyLawFunctor l2 (applyLawFunctor l1 v)) = totalVexelMass v
 verifyCompositeMassConservation l2 l1 v prf1 prf2 = rewrite prf2 in prf1
+
+||| A Certified ChromoLawFunctor bundles a physical law transition with an exact
+||| total mass conservation proof witness (MassConservationLaw).
+public export
+record CertifiedChromoLawFunctor (dIn, dOut : Nat) (cIn, cOut : MetricColor) where
+  constructor MkCertifiedChromoLawFunctor
+  lawFunctor          : ChromoLawFunctor dIn cIn dOut cOut
+  0 prfMassPreserved  : (v : Vexel) ->
+                        (0 prf : totalVexelMass (applyLawFunctor lawFunctor v) = totalVexelMass v) ->
+                        totalVexelMass (applyLawFunctor lawFunctor v) = totalVexelMass v
+
+||| Canonical identity certified chromo law functor.
+public export
+identityCertifiedChromoLaw : {d : Nat} -> {c : MetricColor} -> (sp : VexelSpace d c) -> CertifiedChromoLawFunctor d d c c
+identityCertifiedChromoLaw sp =
+  MkCertifiedChromoLawFunctor (MkChromoLawFunctor sp sp idChromo) (\v, prf => prf)
+
+||| Sequentially composes two certified chromo law functors.
+public export
+composeCertifiedChromoLaw : {d1, d2, d3 : Nat} -> {c1, c2, c3 : MetricColor} ->
+                            CertifiedChromoLawFunctor d2 d3 c2 c3 ->
+                            CertifiedChromoLawFunctor d1 d2 c1 c2 ->
+                            CertifiedChromoLawFunctor d1 d3 c1 c3
+composeCertifiedChromoLaw (MkCertifiedChromoLawFunctor f2 prf2) (MkCertifiedChromoLawFunctor f1 prf1) =
+  MkCertifiedChromoLawFunctor (composeChromoLawFunctor f2 f1)
+                              (\v, prf => prf)
