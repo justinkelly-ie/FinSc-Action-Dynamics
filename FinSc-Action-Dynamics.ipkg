@@ -3,7 +3,7 @@ version = 0.3.0
 authors = "Justin Kelly"
 brief   = "Layer 4c Discrete Action Dynamics, Variational Principle & Conservation Theorems."
 
-depends = FinSc-Geometry, FinSc-Multiset, FinSc-Metric-Substrate, FinSc-Phase-Unfolding, base, linear
+depends = FinSc-Geometry, FinSc-Multiset, FinSc-Metric-Substrate, FinSc-Phase-Unfolding, FinSc-Dihedron, base, linear
 sourcedir = "src"
 
 modules = ActionDynamics,

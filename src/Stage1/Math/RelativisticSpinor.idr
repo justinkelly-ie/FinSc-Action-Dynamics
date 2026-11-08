@@ -16,6 +16,7 @@ import Stage1.RationalTrig
 import Data.List
 import Data.Vect
 import Stage1.DihedronModel as DM
+import Stage1.ProjectiveDihedron as PD
 import Stage1.TypeTheory.Staging as TTS
 
 %default total
@@ -455,6 +456,60 @@ auditDiracSpinorDensityStreamProof =
       dStream = spinorMultisetDensityStream sp
       idOk = auditDiracSpinorIdentityBoost sp
   in dDirect == intToBoxInt 30 && dStream == intToBoxInt 30 && idOk
+
+------------------------------------------------------------------------
+-- 5C. 3D MINKOWSKI PROJECTIVE LORENTZ GROUP & 2LTT STAGED SPINOR TRANSPORT
+------------------------------------------------------------------------
+
+||| An inductive algebraic chain of 3D Minkowski Projective Dihedron Lorentz transformations
+||| (rotations, boosts, null parabolic rotations) in P^3(Q) (Wildberger Theorem 77):
+public export
+data MinkowskiLorentzChain : Type where
+  IdMinkowskiTransform   : MinkowskiLorentzChain
+  ConsMinkowskiTransform : PD.ProjectiveDihedron -> MinkowskiLorentzChain -> MinkowskiLorentzChain
+
+||| Multiplies all transformations in a MinkowskiLorentzChain down to a single effective ProjectiveDihedron:
+public export
+collapseMinkowskiChain : MinkowskiLorentzChain -> PD.ProjectiveDihedron
+collapseMinkowskiChain IdMinkowskiTransform = PD.idProjDihedron
+collapseMinkowskiChain (ConsMinkowskiTransform alpha rest) =
+  PD.mulProjDihedron alpha (collapseMinkowskiChain rest)
+
+||| 2LTT Staged Minkowski Lorentz Chain Compiler:
+||| Multiplies the entire 3D boost and rotation sequence at Level 1 into a single effective proportion.
+public export
+stagedCompileMinkowskiChain : TTS.Lift MinkowskiLorentzChain -> TTS.Code PD.ProjectiveDihedron
+stagedCompileMinkowskiChain qChain =
+  TTS.quote (collapseMinkowskiChain (TTS.splice qChain))
+
+||| Staged 3D Minkowski Vector Transformation: Acts on vector w exactly once with the compiled transformation.
+public export
+stagedApplyMinkowskiVector : TTS.Lift MinkowskiLorentzChain -> PD.MinkowskiVector -> TTS.Code PD.MinkowskiVector
+stagedApplyMinkowskiVector qChain w =
+  let qEff = stagedCompileMinkowskiChain qChain
+      alpha = TTS.splice qEff
+  in TTS.quote (PD.actDihedronVectorScaled alpha w)
+
+||| QTT 0 Erased Proof Witness: 3D Minkowski Lorentz Chain Compilation Soundness
+public export
+0 prfStagedApplyMinkowskiVector : (chain : MinkowskiLorentzChain) -> (w : PD.MinkowskiVector) ->
+                                 TTS.splice (stagedApplyMinkowskiVector (TTS.quote chain) w) =
+                                   PD.actDihedronVectorScaled (collapseMinkowskiChain chain) w
+prfStagedApplyMinkowskiVector _ _ = Refl
+
+||| Audit: Staged 3D Minkowski vector transformation preserves relativistic quadrance up to determinant scaling:
+public export
+auditStagedMinkowskiQuadranceProof : Bool
+auditStagedMinkowskiQuadranceProof =
+  let v = PD.MkMVec (intToBoxInt 5) (intToBoxInt 3) (intToBoxInt 4)
+      alpha = PD.MkProjDihedron (intToBoxInt 1) (PD.MkMVec (intToBoxInt 0) (intToBoxInt 1) (intToBoxInt 0))
+      chain = ConsMinkowskiTransform alpha IdMinkowskiTransform
+      wPrime = TTS.splice (stagedApplyMinkowskiVector (TTS.quote chain) v)
+      qOrig = PD.quadranceMVec v
+      qTrans = PD.quadranceMVec wPrime
+      n = PD.projNorm alpha
+      n2 = mulBox n n
+  in qTrans == mulBox n2 qOrig
 
 ------------------------------------------------------------------------
 -- 8. SPARSE DIRAC GAMMA ALGEBRA (SquareMaxel 4) & SPINOR CONTRACTION
