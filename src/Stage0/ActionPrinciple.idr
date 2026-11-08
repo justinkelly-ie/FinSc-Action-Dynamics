@@ -82,7 +82,6 @@ discreteLagrangianDynamic geom (MkCoord2D x1 y1) (MkCoord2D x2 y2) vPot =
   in tKin - vVal
 
 ||| Computes the Discrete Action S[γ] along an ordered sequence of coordinates.
-%inline
 public export
 discreteAction : Stage1.FourGeometries.FundamentalGeometry -> List LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
 discreteAction _ [] _ = Stage0.BoxInt.intToBoxInt 0
@@ -150,6 +149,25 @@ streamTrajectoryActionFuelModel : (geom : Stage1.FourGeometries.FundamentalGeome
                                   FusedStream LatticeCoord2D -> Stage0.BoxInt.BoxInt
 streamTrajectoryActionFuelModel geom vPot coordStrm =
   streamDiscreteActionFuelModel geom vPot (streamAdjacentPairs coordStrm)
+
+||| Evaluates dynamic action integral directly over a deforested stream using model-indexed GohFuel.
+public export
+streamDiscreteActionDynamicFuelModel : (geom : Stage1.FourGeometries.FundamentalGeometry) ->
+                                       (LatticeCoord2D -> Stage0.BoxInt.BoxInt) ->
+                                       FusedStream (LatticeCoord2D, LatticeCoord2D) -> Stage0.BoxInt.BoxInt
+streamDiscreteActionDynamicFuelModel geom vPot pairStrm =
+  foldStreamNat (gohSteps (Stage1.FourGeometries.geometryGohFuel geom))
+    (\acc, (x0, x1) => acc + discreteLagrangianDynamic geom x0 x1 vPot)
+    (Stage0.BoxInt.intToBoxInt 0)
+    pairStrm
+
+||| Evaluates dynamic trajectory action integral from raw coordinates using model-indexed GohFuel.
+public export
+streamTrajectoryActionDynamicFuelModel : (geom : Stage1.FourGeometries.FundamentalGeometry) ->
+                                         (LatticeCoord2D -> Stage0.BoxInt.BoxInt) ->
+                                         FusedStream LatticeCoord2D -> Stage0.BoxInt.BoxInt
+streamTrajectoryActionDynamicFuelModel geom vPot coordStrm =
+  streamDiscreteActionDynamicFuelModel geom vPot (streamAdjacentPairs coordStrm)
 
 
 ------------------------------------------------------------------------
