@@ -10,6 +10,7 @@ import Stage1.Math.QuadStreamPhysicalLaws
 import Stage1.Math.RelativisticSpinor
 import Stage1.Math.DensityMatrix
 import Stage1.Math.CosmicGenesis
+import Stage1.Dynamics.QuadStreamLawCatalog
 import Stage0.QTTDynamics
 import Language.Reflection
 
@@ -167,6 +168,16 @@ public export
 auditMasterPrimorial210Companion : Elab (Reflect.ActionAuditor.auditMasterPrimorial210CompanionProofExport = True)
 auditMasterPrimorial210Companion = auditWitness Reflect.ActionAuditor.auditMasterPrimorial210CompanionProofExport
 
+||| Audit 13: 2LTT Staged Catalog Pipeline Partition and Dark Matter Remainder Dissipation.
+public export
+auditCatalogPipelinePartitionProofExport : Bool
+auditCatalogPipelinePartitionProofExport = Stage1.Dynamics.QuadStreamLawCatalog.auditCatalogPipelinePartitionProof
+
+public export
+%macro
+auditCatalogPipelinePartition : Elab (Reflect.ActionAuditor.auditCatalogPipelinePartitionProofExport = True)
+auditCatalogPipelinePartition = auditWitness Reflect.ActionAuditor.auditCatalogPipelinePartitionProofExport
+
 ||| Batch action dynamic auditor witnesses.
 public export
 actionAuditorWitnesses : List Bool
@@ -183,6 +194,7 @@ actionAuditorWitnesses =
   , auditDeforestedQuadStreamPipelineProofExport
   , auditCompositeCosmicBaryonConservationProofExport
   , auditMasterPrimorial210CompanionProofExport
+  , auditCatalogPipelinePartitionProofExport
   ]
 
 

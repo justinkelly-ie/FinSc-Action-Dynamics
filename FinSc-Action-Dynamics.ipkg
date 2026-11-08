@@ -81,4 +81,5 @@ modules = ActionDynamics,
           Stage1.Math.VacuumDispersion,
           Stage1.Math.VacuumPolarization,
           Stage1.Math.WorkFreeEnergyEquality,
-          Stage1.Math.QuadStreamPhysicalLaws
+          Stage1.Math.QuadStreamPhysicalLaws,
+          Stage1.Dynamics.QuadStreamLawCatalog

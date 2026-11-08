@@ -5,6 +5,8 @@ import public Stage1.Basis.Coordinate
 import public Stage1.MultisetTree
 import public Stage1.ChromoCategory
 import Stage1.MultisetDuality
+import public Stage1.TypeTheory.Staging
+import public Stage1.TypeTheory.TwoLevel
 
 %default total
 
@@ -101,3 +103,46 @@ composeCertifiedChromoLaw : {d1, d2, d3 : Nat} -> {c1, c2, c3 : MetricColor} ->
 composeCertifiedChromoLaw (MkCertifiedChromoLawFunctor f2 prf2) (MkCertifiedChromoLawFunctor f1 prf1) =
   MkCertifiedChromoLawFunctor (composeChromoLawFunctor f2 f1)
                               (\v, prf => prf)
+
+------------------------------------------------------------------------
+-- 4. 2LTT STAGED PHYSICAL LAW COMPOSITION (LEVEL 0 METAPROGRAMMING)
+------------------------------------------------------------------------
+
+||| 2LTT Staged ChromoLawFunctor at Level 0 (Strict Metaprogram):
+public export
+StagedChromoLawFunctor : Nat -> MetricColor -> Nat -> MetricColor -> Type
+StagedChromoLawFunctor dIn cIn dOut cOut = Lift (ChromoLawFunctor dIn cIn dOut cOut)
+
+||| Pre-composes two physical law functors at compile time (Level 0),
+||| multiplying their sparse Maxel transfer matrices definitionally:
+public export
+stageComposeChromoLaw : {d1, d2, d3 : Nat} -> {c1, c2, c3 : MetricColor} ->
+                        StagedChromoLawFunctor d2 c2 d3 c3 ->
+                        StagedChromoLawFunctor d1 c1 d2 c2 ->
+                        Code (ChromoLawFunctor d1 c1 d3 c3)
+stageComposeChromoLaw qL2 qL1 =
+  quote (composeChromoLawFunctor (splice qL2) (splice qL1))
+
+||| Proof witness certifying 2LTT staged law composition equivalence:
+public export
+0 prfStageComposeChromoLaw : {d1, d2, d3 : Nat} -> {c1, c2, c3 : MetricColor} ->
+                             (l2 : ChromoLawFunctor d2 c2 d3 c3) ->
+                             (l1 : ChromoLawFunctor d1 c1 d2 c2) ->
+                             splice (stageComposeChromoLaw (quote l2) (quote l1)) =
+                               composeChromoLawFunctor l2 l1
+prfStageComposeChromoLaw _ _ = Refl
+
+||| Staged physical law application: evaluates law on vexel at Stage 0:
+public export
+stagedApplyLaw : {dIn, dOut : Nat} -> {cIn, cOut : MetricColor} ->
+                 StagedChromoLawFunctor dIn cIn dOut cOut -> Lift Vexel -> Code Vexel
+stagedApplyLaw qLaw qV =
+  quote (applyLawFunctor (splice qLaw) (splice qV))
+
+||| Proof witness certifying staged law application equivalence:
+public export
+0 prfStagedApplyLaw : {dIn, dOut : Nat} -> {cIn, cOut : MetricColor} ->
+                      (law : ChromoLawFunctor dIn cIn dOut cOut) ->
+                      (v : Vexel) ->
+                      splice (stagedApplyLaw (quote law) (quote v)) = applyLawFunctor law v
+prfStagedApplyLaw _ _ = Refl

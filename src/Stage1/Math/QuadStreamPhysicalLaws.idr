@@ -16,6 +16,8 @@ import Stage1.Math.HelmholtzFreeEnergy
 import Stage1.MultisetDuality
 import Stage1.MultisetTensor
 import Stage1.FourGeometries
+import public Stage1.TypeTheory.Staging
+import public Stage1.TypeTheory.TwoLevel
 import Data.Vect
 
 %default total
@@ -415,4 +417,62 @@ MultisetAdjunction QuadLawFunctor AbstractQuadLawFunctor where
   homTensorInv = quadLawHomTensorInv
   verifyHomIso = proofQuadLawHomIso
   verifyHomInv = proofQuadLawHomInv
+
+--------------------------------------------------------------------------------
+-- 5. CONSTRUCTIVIST PARABOLIC DARK MATTER DRAIN & DISSIPATION SINK
+--------------------------------------------------------------------------------
+
+||| Drains Landauer information erasure tokens (Q_diss = kT ln 2 * ΔS_erased) or
+||| non-equilibrium thermodynamic entropy directly into the Parabolic dissipation channel.
+||| Since the Parabolic sector carries null momentum p_null = (0, 0) and det g = 0,
+||| dissipation entropy is safely drained without corrupting coherent baryonic bound states (27 VM)
+||| or gauge flux (128 DE).
+public export
+drainParabolicDissipation : (erasureTokens : BoxInt) ->
+                           QuadStreamMultiset BoxInt ->
+                           QuadStreamMultiset BoxInt
+drainParabolicDissipation tokens (MkQuadStream e h p s) =
+  MkQuadStream e h (AddM (intToBoxInt 0) tokens p) s
+
+||| Zero-allocation deforested streaming transducer draining parabolic dissipation with %spec fuel:
+%spec fuel
+public export
+streamParabolicDissipationDrain : (fuel : Nat) -> (erasureTokens : BoxInt) ->
+                                 FusedStream (QuadStreamChannel, BoxInt, BoxInt) ->
+                                 FusedStream (QuadStreamChannel, BoxInt, BoxInt)
+streamParabolicDissipationDrain fuel tokens strm =
+  appendStream strm (stream [(ParabolicSector, intToBoxInt 0, tokens)])
+
+--------------------------------------------------------------------------------
+-- 6. 2LTT STAGED QUAD-STREAM LAW SPECIALIZATION & %spec PIPELINE
+--------------------------------------------------------------------------------
+
+||| 2LTT Staged QuadStream Law Operator at Level 0:
+public export
+StagedQuadLaw : Type
+StagedQuadLaw = Lift (QuadStreamMultiset BoxInt -> QuadStreamMultiset BoxInt)
+
+||| Pre-composes two QuadStream laws at compile time (Level 0):
+public export
+stageComposeQuadLaws : StagedQuadLaw -> StagedQuadLaw -> Code (QuadStreamMultiset BoxInt -> QuadStreamMultiset BoxInt)
+stageComposeQuadLaws qL2 qL1 =
+  quote (composeQuadLaws (splice qL1) (splice qL2))
+
+||| Proof witness certifying 2LTT staged QuadStream law composition equivalence:
+public export
+0 prfStageComposeQuadLaws : (l1, l2 : QuadStreamMultiset BoxInt -> QuadStreamMultiset BoxInt) ->
+                            splice (stageComposeQuadLaws (quote l2) (quote l1)) = composeQuadLaws l1 l2
+prfStageComposeQuadLaws _ _ = Refl
+
+||| Zero-allocation deforested law sector dispatcher with %spec channel, fuel:
+%spec channel, fuel
+public export
+fusedQuadStreamLawTransducerDirect :
+  (channel : QuadStreamChannel) ->
+  (fuel : Nat) ->
+  (BoxInt -> BoxInt) ->
+  FusedStream (QuadStreamChannel, BoxInt, BoxInt) ->
+  FusedStream (QuadStreamChannel, BoxInt, BoxInt)
+fusedQuadStreamLawTransducerDirect ch fuel op strm =
+  mapStream (\(c, v, w) => if c == ch then (c, op v, w) else (c, v, w)) strm
 

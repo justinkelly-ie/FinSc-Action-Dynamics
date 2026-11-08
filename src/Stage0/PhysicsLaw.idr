@@ -4,6 +4,8 @@ import public Stage0.BoxInt
 import public Stage1.Basis.Coordinate
 import public Stage1.ChromoCategory
 import public Stage0.ChromoLawFunctor
+import public Stage0.OnSeq.FusedStream
+import public Stage1.TypeTheory.Staging
 
 %default total
 
@@ -81,3 +83,41 @@ implementation PhysicsLaw 2 where
   lawOperator = composeChromoLawFunctor
                   (MkChromoLawFunctor (defaultSpace 4 Red) (defaultSpace 4 Red) idChromo)
                   (MkChromoLawFunctor (defaultSpace 4 Red) (defaultSpace 4 Red) idChromo)
+
+------------------------------------------------------------------------
+-- 2LTT STAGING & COMPILER %spec STREAMING LAW OPERATORS
+------------------------------------------------------------------------
+
+||| Executes a verified physical law on a state Vexel:
+public export
+applyPhysicsLaw : {lawID : Nat} -> (inst : PhysicsLaw lawID) => Vexel -> Vexel
+applyPhysicsLaw @{inst} v = applyLawFunctor (lawOperator @{inst}) v
+
+||| Lifts a physical law operator to Level 0 static metaprogram code:
+public export
+stagedPhysicsLaw : {lawID : Nat} -> (inst : PhysicsLaw lawID) =>
+                   StagedChromoLawFunctor (dimOfLaw @{inst}) (colorOfLaw @{inst}) (dimOfLaw @{inst}) (colorOfLaw @{inst})
+stagedPhysicsLaw @{inst} = quote (lawOperator @{inst})
+
+||| Evaluates a physical law on a staged Vexel at compile time:
+public export
+stagedApplyPhysicsLaw : {lawID : Nat} -> (inst : PhysicsLaw lawID) =>
+                        Lift Vexel -> Code Vexel
+stagedApplyPhysicsLaw @{inst} qV =
+  stagedApplyLaw (stagedPhysicsLaw @{inst}) qV
+
+||| Proof witness certifying equivalence of staged physical law application:
+public export
+0 prfStagedApplyPhysicsLaw : {lawID : Nat} -> (inst : PhysicsLaw lawID) =>
+                             (v : Vexel) ->
+                             splice (stagedApplyPhysicsLaw @{inst} (quote v)) = applyPhysicsLaw @{inst} v
+prfStagedApplyPhysicsLaw @{inst} v = Refl
+
+||| Zero-allocation deforested streaming transducer applying a PhysicalLaw across a Vexel stream.
+||| Uses %spec lawID, fuel for monomorphic argument specialization without full AST duplication.
+%spec lawID, fuel
+public export
+streamApplyPhysicsLaw : (lawID : Nat) -> {auto inst : PhysicsLaw lawID} -> (fuel : Nat) ->
+                        FusedStream Vexel -> FusedStream Vexel
+streamApplyPhysicsLaw lawID fuel strm =
+  mapStream (applyPhysicsLaw @{inst}) strm

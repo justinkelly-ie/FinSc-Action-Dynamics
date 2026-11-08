@@ -76,5 +76,6 @@ import public Stage1.Math.VacuumPolarization
 import public Stage1.Math.WorkFreeEnergyEquality
 import public Stage1.Math.QuadStreamPhysicalLaws
 import public Stage1.Dynamics.PythagoreanSpreadObservables
+import public Stage1.Dynamics.QuadStreamLawCatalog
 
 %default total

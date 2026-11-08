@@ -5,6 +5,8 @@ import Stage1.ScaleTransform
 import Stage1.MultisetDuality
 import PhaseUnfolding
 import Stage0.ActionPrinciple
+import public Stage0.OnSeq.FusedStream
+import public Stage1.TypeTheory.Staging
 
 %default total
 
@@ -59,3 +61,20 @@ prfFunctorComposition _ = Refl
 public export
 composeLawFunctors : Functor f => (a -> b) -> (b -> c) -> f a -> f c
 composeLawFunctors f g container = map g (map f container)
+
+||| 2LTT Staged Functor Map: Pre-evaluates function composition at Level 0:
+public export
+stagedMap : Functor f => Lift (a -> b) -> Lift (f a) -> Code (f b)
+stagedMap qf qfa = quote (map (splice qf) (splice qfa))
+
+||| Proof witness certifying 2LTT staged functor map equivalence:
+public export
+0 prfStagedMap : Functor f => (g : a -> b) -> (fa : f a) ->
+                 splice (stagedMap (quote g) (quote fa)) = map g fa
+prfStagedMap _ _ = Refl
+
+||| Zero-allocation deforested streaming law pushforward with %spec fuel:
+%spec fuel
+public export
+streamLawPushforward : (fuel : Nat) -> (a -> b) -> FusedStream a -> FusedStream b
+streamLawPushforward fuel f strm = mapStream f strm
