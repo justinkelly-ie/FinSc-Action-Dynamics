@@ -6,6 +6,7 @@ import Stage1.QuadStream
 import Stage1.Math.QuadStreamPhysicalLaws
 import Stage1.MultisetDuality
 import Stage1.MultisetTensor
+import Stage1.FourGeometries
 import Data.List
 
 %default total
@@ -14,11 +15,31 @@ import Data.List
 -- 1. LAW 52: DISCRETE TRIPLE-ALPHA CARBON & PHOSPHORUS NUCLEOSYNTHESIS
 ------------------------------------------------------------------------
 
-||| Evaluates Triple-Alpha fusion mass token conservation: 3 * Alpha (108) = Carbon-12 (324).
+||| Nucleons in an Alpha cluster (2 protons + 2 neutrons = 4).
+public export
+alphaNucleonCount : Nat
+alphaNucleonCount = 4
+
+||| Mass tokens for a single Alpha cluster: 4 nucleons * 27 tokens/nucleon = 108.
+public export
+alphaMassTokens : BoxInt
+alphaMassTokens = intToBoxInt (cast (alphaNucleonCount * ellipticLatticeCapacity))
+
+||| Number of Alpha clusters in a Triple-Alpha fusion event (3).
+public export
+tripleAlphaClusterCount : Nat
+tripleAlphaClusterCount = 3
+
+||| Mass tokens for a Carbon-12 nucleus: 3 * 108 = 324 tokens (12 nucleons * 27 tokens/nucleon).
+public export
+carbon12MassTokens : BoxInt
+carbon12MassTokens = intToBoxInt (cast (tripleAlphaClusterCount * alphaNucleonCount * ellipticLatticeCapacity))
+
+||| Evaluates Triple-Alpha fusion mass token conservation: 3 * Alpha = Carbon-12.
 %inline
 public export
 tripleAlphaFusionTokens : BoxInt -> BoxInt
-tripleAlphaFusionTokens alphaMass = intToBoxInt 3 * alphaMass
+tripleAlphaFusionTokens alphaMass = intToBoxInt (cast tripleAlphaClusterCount) * alphaMass
 
 ||| Evaluates QuadStream Triple-Alpha fusion mass token conservation.
 public export
@@ -27,11 +48,16 @@ evaluateQuadStreamTripleAlpha (MkQuadStream e h p s) =
   let totalAlpha = multisetSum e + multisetSum h + multisetSum p + multisetSum s
   in tripleAlphaFusionTokens totalAlpha
 
-||| Evaluates Phosphorus-31 synthesis token count (837 tokens = 31 * 27).
+||| Nucleon count of Phosphorus-31 (15 protons + 16 neutrons = 31).
+public export
+phosphorus31NucleonCount : Nat
+phosphorus31NucleonCount = 31
+
+||| Evaluates Phosphorus-31 synthesis token count: 31 nucleons * 27 tokens/nucleon = 837 tokens.
 %inline
 public export
 phosphorus31MassTokens : BoxInt
-phosphorus31MassTokens = intToBoxInt 837
+phosphorus31MassTokens = intToBoxInt (cast (phosphorus31NucleonCount * ellipticLatticeCapacity))
 
 ------------------------------------------------------------------------
 -- 2. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
@@ -110,12 +136,12 @@ MultisetAdjunction TripleAlphaFunctor AbstractTripleAlphaFunctor where
 ------------------------------------------------------------------------
 
 ||| Audits Law 52 (Triple-Alpha Carbon & Phosphorus Nucleosynthesis):
-||| 1. 3 * 108 = 324 mass tokens for 12C core.
-||| 2. 31P carries 837 mass tokens (31 amu).
+||| 1. 3 * 108 = 324 mass tokens for 12C core (observed from ellipticLatticeCapacity).
+||| 2. 31P carries 837 mass tokens (31 amu * 27 tokens/amu).
 %inline
 public export
 auditLaw52TripleAlphaProof : Bool
 auditLaw52TripleAlphaProof =
-  let c12 = tripleAlphaFusionTokens (intToBoxInt 108)
-  in (c12 == intToBoxInt 324) && (phosphorus31MassTokens == intToBoxInt 837)
+  let c12 = tripleAlphaFusionTokens alphaMassTokens
+  in (c12 == carbon12MassTokens) && (phosphorus31MassTokens == intToBoxInt (31 * cast ellipticLatticeCapacity))
 

@@ -6,6 +6,7 @@ import Stage1.QuadStream
 import Stage1.Math.QuadStreamPhysicalLaws
 import Stage1.MultisetDuality
 import Stage1.MultisetTensor
+import Stage1.FourGeometries
 import Data.List
 
 %default total
@@ -14,17 +15,22 @@ import Data.List
 -- 1. LAW 53: DISCRETE STELLAR NUCLEOSYNTHESIS & IRON-56 PEAK BINDING
 ------------------------------------------------------------------------
 
-||| Evaluates Iron-56 nucleus mass tokens (1512 tokens = 56 nucleons * 27 tokens/nucleon).
+||| Nucleon count of Iron-56 (26 protons + 30 neutrons = 56).
+public export
+iron56NucleonCount : Nat
+iron56NucleonCount = 56
+
+||| Evaluates Iron-56 nucleus mass tokens (56 nucleons * 27 tokens/nucleon = 1512).
 %inline
 public export
 iron56MassTokens : BoxInt
-iron56MassTokens = intToBoxInt 1512
+iron56MassTokens = intToBoxInt (cast (iron56NucleonCount * ellipticLatticeCapacity))
 
 ||| Verifies maximum binding energy peak per nucleon at Iron-56 (56 amu).
 %inline
 public export
 isIron56BindingPeak : BoxInt -> Bool
-isIron56BindingPeak m = m == intToBoxInt 1512
+isIron56BindingPeak m = m == iron56MassTokens
 
 ||| Evaluates Iron-56 peak binding peak from QuadStream payload.
 public export
