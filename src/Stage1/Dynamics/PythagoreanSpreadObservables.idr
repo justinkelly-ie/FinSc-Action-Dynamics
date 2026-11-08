@@ -195,3 +195,4 @@ export
 %macro
 auditPythagoreanSpreadObservables : Elab (Stage1.Dynamics.PythagoreanSpreadObservables.auditPythagoreanSpreadObservablesProof = True)
 auditPythagoreanSpreadObservables = pure Refl
+
