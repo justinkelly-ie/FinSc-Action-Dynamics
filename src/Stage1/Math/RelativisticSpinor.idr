@@ -512,6 +512,56 @@ auditStagedMinkowskiQuadranceProof =
   in qTrans == mulBox n2 qOrig
 
 ------------------------------------------------------------------------
+-- 5D. 3D MINKOWSKI PROJECTIVE LORENTZ ACTION ON DIRAC BISPINORS
+------------------------------------------------------------------------
+
+||| 2x2 Matrix action on a 2-component BoxInt vector:
+public export
+actMatrix2x2Vect2 : PD.DihedronMatrix2x2 -> Vect 2 BoxInt -> Vect 2 BoxInt
+actMatrix2x2Vect2 (PD.MkDMat2x2 a b c d) [v0, v1] =
+  [(a * v0) + (b * v1), (c * v0) + (d * v1)]
+
+||| Transforms a Dirac bispinor under a 3D Minkowski Projective Dihedron Lorentz transformation:
+||| Left Weyl spinor transforms by mu(alpha); Right Weyl spinor transforms by mu(alpha*) = adj(mu(alpha)).
+public export
+boostDiracSpinorProjective : PD.ProjectiveDihedron -> DiracSpinorMultiset -> DiracSpinorMultiset
+boostDiracSpinorProjective p (MkDiracSpinor left right) =
+  let matAlpha = PD.dihedronToMatrix (PD.projToDihedron p)
+      matAlphaStar = PD.dihedronToMatrix (PD.projToDihedron (PD.invProjDihedron p))
+      left'  = actMatrix2x2Vect2 matAlpha left
+      right' = actMatrix2x2Vect2 matAlphaStar right
+  in MkDiracSpinor left' right'
+
+||| 2LTT Staged 3D Minkowski Dirac Spinor Lorentz Transformation:
+||| Pre-compiles the entire boost and rotation chain into a single effective rational 2x2 matrix step.
+public export
+stagedApplyDiracSpinorMinkowski : TTS.Lift MinkowskiLorentzChain -> DiracSpinorMultiset -> TTS.Code DiracSpinorMultiset
+stagedApplyDiracSpinorMinkowski qChain sp =
+  let qEff = stagedCompileMinkowskiChain qChain
+      alpha = TTS.splice qEff
+  in TTS.quote (boostDiracSpinorProjective alpha sp)
+
+||| QTT 0 Erased Proof Witness: Staged 3D Dirac Spinor Lorentz Transformation Soundness
+public export
+0 prfStagedApplyDiracSpinorMinkowski : (chain : MinkowskiLorentzChain) -> (sp : DiracSpinorMultiset) ->
+                                      TTS.splice (stagedApplyDiracSpinorMinkowski (TTS.quote chain) sp) =
+                                        boostDiracSpinorProjective (collapseMinkowskiChain chain) sp
+prfStagedApplyDiracSpinorMinkowski _ _ = Refl
+
+||| Audit: Verifies that identity ProjectiveDihedron preserves Dirac bispinors,
+||| and that rational boost from a Pythagorean triad scales Dirac components lawfully:
+public export
+auditProjectiveDiracSpinorBoostProof : Bool
+auditProjectiveDiracSpinorBoostProof =
+  let sp = MkDiracSpinor [intToBoxInt 1, intToBoxInt 0] [intToBoxInt 0, intToBoxInt 1]
+      idPreserved = boostDiracSpinorProjective PD.idProjDihedron sp == sp
+      b345 = PD.mkVelocityBoostFromTriad (intToBoxInt 3) (intToBoxInt 4) (intToBoxInt 5)
+      spBoosted = boostDiracSpinorProjective b345 sp
+      chain = ConsMinkowskiTransform b345 IdMinkowskiTransform
+      spStaged = TTS.splice (stagedApplyDiracSpinorMinkowski (TTS.quote chain) sp)
+  in idPreserved && (spBoosted == spStaged)
+
+------------------------------------------------------------------------
 -- 8. SPARSE DIRAC GAMMA ALGEBRA (SquareMaxel 4) & SPINOR CONTRACTION
 ------------------------------------------------------------------------
 
