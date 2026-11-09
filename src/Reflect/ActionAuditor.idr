@@ -44,7 +44,7 @@ boxMulMono (MkBoxInt a) (MkBoxInt b) = MkBoxInt (a * b)
 public export
 auditGeodesicLeastActionProof : Bool
 auditGeodesicLeastActionProof =
-  boxEqMono (boxAddMono (boxMulMono (MkBoxInt 3) (MkBoxInt 3)) (boxMulMono (MkBoxInt 4) (MkBoxInt 4))) (MkBoxInt 25)
+  (intToBoxInt 3 * intToBoxInt 3 + intToBoxInt 4 * intToBoxInt 4) == intToBoxInt 25
 
 public export
 %macro
@@ -55,7 +55,7 @@ auditGeodesicLeastAction = pure Refl
 public export
 auditNoetherConservationProof : Bool
 auditNoetherConservationProof =
-  boxEqMono (boxAddMono (MkBoxInt 5) (MkBoxInt 4)) (boxAddMono (MkBoxInt 6) (MkBoxInt 3))
+  (intToBoxInt 5 + intToBoxInt 4) == (intToBoxInt 6 + intToBoxInt 3)
 
 public export
 %macro
@@ -66,7 +66,7 @@ auditNoetherConservation = pure Refl
 public export
 auditCausalActionAsymmetryProof : Bool
 auditCausalActionAsymmetryProof =
-  not (boxEqMono (boxSubMono (MkBoxInt 10) (MkBoxInt 4)) (boxSubMono (MkBoxInt 4) (MkBoxInt 10)))
+  not ((intToBoxInt 10 - intToBoxInt 4) == (intToBoxInt 4 - intToBoxInt 10))
 
 public export
 %macro
