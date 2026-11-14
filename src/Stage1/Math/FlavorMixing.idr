@@ -140,9 +140,8 @@ pmnsUnitarityValid =
 ||| Multiset_Matter(+1) + Multiset_AntiMatter(-1) -> Multiset_DEPhoton(+2)
 public export
 annihilateMatterAntiMatterMultiset : Box BoxInt -> Box BoxInt -> Box BoxInt
-annihilateMatterAntiMatterMultiset (MkBox anti) (MkBox mat) =
-  let dePhotonItem = (intToBoxInt 2, intToBoxInt 1)
-  in MkBox (dePhotonItem :: mat)
+annihilateMatterAntiMatterMultiset _ mat =
+  insertBox (intToBoxInt 2) (intToBoxInt 1) mat
 
 ------------------------------------------------------------------------
 -- 5. FORMAL INVARIANT AUDIT

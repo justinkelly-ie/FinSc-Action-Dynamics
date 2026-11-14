@@ -24,6 +24,13 @@ Eq EnantiomerHand where
   DHand == DHand = True
   _     == _     = False
 
+public export
+Ord EnantiomerHand where
+  compare LHand LHand = EQ
+  compare LHand DHand = LT
+  compare DHand LHand = GT
+  compare DHand DHand = EQ
+
 ||| Inverts enantiomer chirality (L <-> D inversion).
 %inline
 public export
