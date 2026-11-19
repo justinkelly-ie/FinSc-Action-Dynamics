@@ -63,9 +63,9 @@ public export
 eraseQuadStreamBits : Nat -> Nat -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt
 eraseQuadStreamBits b tScale (MkQuadStream e h p s) =
   let dissipated = Stage0.BoxInt.intToBoxInt (cast (b * tScale))
-      eNew = multisetSum e - dissipated
-      sNew = multisetSum s + dissipated
-  in MkQuadStream (AddM 0 eNew ZeroM) h p (AddM 0 sNew ZeroM)
+      eNew = totalMassBox e - dissipated
+      sNew = totalMassBox s + dissipated
+  in MkQuadStream (singletonCarrier (intToBoxInt 0) eNew) h p (singletonCarrier (intToBoxInt 0) sNew)
 
 ------------------------------------------------------------------------
 -- 3. CONSTRUCTIVE FORMAL AUDIT PROOFS
@@ -164,7 +164,7 @@ proofLandauerHomInv (AddM (val, MkAbstractLandauerFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractLandauerFunctor s b) w) rec
 
 public export
-MultisetAdjunction LandauerFunctor AbstractLandauerFunctor where
+MultisetDuality LandauerFunctor AbstractLandauerFunctor where
   leftAdjoint x = MkLandauerFunctor (MkBitMemoryState 0 (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkLandauerFunctor _ x) = x
   homTensorIso = landauerHomTensorIso

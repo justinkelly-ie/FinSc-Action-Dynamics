@@ -34,13 +34,11 @@ Eq LatticeCoord2D where
   (MkCoord2D x1 y1) == (MkCoord2D x2 y2) = x1 == x2 && y1 == y2
 
 ||| Difference vector between two lattice coordinates: Δx = x_{k+1} - x_k.
-%inline
 public export
 coordDiff : LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D
 coordDiff (MkCoord2D x2 y2) (MkCoord2D x1 y1) = MkCoord2D (x2 - x1) (y2 - y1)
 
 ||| Computes metric kinetic quadrance: T_g(Δx) = Δx^T · g · Δx.
-%inline
 public export
 metricKineticQuadrance : Maxel -> LatticeCoord2D -> Stage0.BoxInt.BoxInt
 metricKineticQuadrance m (MkCoord2D dx dy) =
@@ -52,7 +50,6 @@ metricKineticQuadrance m (MkCoord2D dx dy) =
   in (dx * row1) + (dy * row2)
 
 ||| Discrete Lagrangian: L(x_k, x_{k+1}) = T_g(Δx) + SubstrateCoupling(x_k, x_{k+1}) - V(x_k).
-%inline
 public export
 discreteLagrangian : Stage1.FourGeometries.FundamentalGeometry -> LatticeCoord2D -> LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
 discreteLagrangian SubstrateGeom (MkCoord2D x1 y1) (MkCoord2D x2 y2) vPot =
@@ -176,7 +173,6 @@ streamTrajectoryActionDynamicFuelModel geom vPot coordStrm =
 ------------------------------------------------------------------------
 
 ||| Discrete second-order difference / acceleration: Δ²x = x_{k+1} - 2x_k + x_{k-1}.
-%inline
 public export
 discreteAcceleration : LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D
 discreteAcceleration (MkCoord2D xPrev yPrev) (MkCoord2D xCurr yCurr) (MkCoord2D xNext yNext) =
@@ -185,7 +181,6 @@ discreteAcceleration (MkCoord2D xPrev yPrev) (MkCoord2D xCurr yCurr) (MkCoord2D 
 
 ||| Discrete Euler-Lagrange residual: g · Δ²x + ∇V(x_k).
 ||| For extremal physical trajectories, this residual evaluates strictly to (0, 0).
-%inline
 public export
 discreteEulerLagrangeResidual : Maxel -> LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D
 discreteEulerLagrangeResidual m prev curr next (MkCoord2D gradVx gradVy) =
@@ -201,13 +196,11 @@ discreteEulerLagrangeResidual m prev curr next (MkCoord2D gradVx gradVy) =
 ------------------------------------------------------------------------
 
 ||| Zero potential function for free particle trajectories.
-%inline
 public export
 zeroPotential : LatticeCoord2D -> Stage0.BoxInt.BoxInt
 zeroPotential _ = Stage0.BoxInt.intToBoxInt 0
 
 ||| Linear potential gradient: V(x, y) = x -> ∇V = (1, 0).
-%inline
 public export
 linearPotentialGrad : LatticeCoord2D
 linearPotentialGrad = MkCoord2D (Stage0.BoxInt.intToBoxInt 1) (Stage0.BoxInt.intToBoxInt 0)
@@ -228,7 +221,6 @@ public export
 prfSubstrateActionAsymmetry = Refl
 
 ||| Computes discrete canonical momentum token: p_k = g · (x_{k+1} - x_k).
-%inline
 public export
 discreteCanonicalMomentum : Maxel -> LatticeCoord2D -> LatticeCoord2D -> LatticeCoord2D
 discreteCanonicalMomentum m (MkCoord2D x1 y1) (MkCoord2D x2 y2) =
@@ -271,7 +263,6 @@ prfSectorSpecificActionSignatures = Refl
 
 ||| 2LTT Stratified Discrete Action: Strict deforested sequence of trajectory coordinates (StrictLevel) 
 ||| evaluated into an inner synthetic homotopy action manifold (HomotopyLevel).
-%inline
 public export
 discreteAction2LTT : Stage1.FourGeometries.FundamentalGeometry -> Stage1.TypeTheory.TwoLevel.StrictLevel (List LatticeCoord2D) -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Stage1.TypeTheory.TwoLevel.HomotopyLevel Stage0.BoxInt.BoxInt
 discreteAction2LTT geom (Stage1.TypeTheory.TwoLevel.MkStrict coords) vPot =
@@ -298,13 +289,13 @@ verifyDiscreteActionPathEquivalence _ prf = prf
 
 ||| Discrete trajectory action multiset assigning each step k its Lagrangian value.
 public export
-trajectoryActionMultiset : Stage1.FourGeometries.FundamentalGeometry -> List LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Multiset BoxInt Nat
+trajectoryActionMultiset : Stage1.FourGeometries.FundamentalGeometry -> List LatticeCoord2D -> (LatticeCoord2D -> Stage0.BoxInt.BoxInt) -> Carrier Nat
 trajectoryActionMultiset geom coords vPot =
   let helper : Nat -> List LatticeCoord2D -> List (Nat, BoxInt)
       helper _ [] = []
       helper _ [_] = []
       helper k (x0 :: x1 :: rest) = (k, discreteLagrangian geom x0 x1 vPot) :: helper (S k) (x1 :: rest)
-  in fromListBox (helper 1 coords)
+  in MkBox (helper 1 coords)
 
 ||| Stationary Action Reaction Path Witness (δS = 0):
 ||| Certifies that an equal-and-opposite perturbation (+δ, -δ) at step k cancels identically

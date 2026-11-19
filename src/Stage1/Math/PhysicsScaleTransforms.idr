@@ -33,7 +33,7 @@ Show ConcretePhysicsState where
 public export
 evaluateQuadStreamConcretePhysics : QuadStreamMultiset Stage0.BoxInt.BoxInt -> ConcretePhysicsState
 evaluateQuadStreamConcretePhysics (MkQuadStream e h p s) =
-  MkConcretePhysics (multisetSum e + multisetSum h + multisetSum p + multisetSum s)
+  MkConcretePhysics (totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s)
 
 ||| Abstract macro physical domain state wrapping spatial quadrance BoxInt
 public export
@@ -51,7 +51,7 @@ Show PhysicsMacroDomain where
 
 ||| Heterogeneous MultisetScaleAdjunction instance (f_* ⊣ f^*) between ConcretePhysicsState and PhysicsMacroDomain
 public export
-Stage1.MultisetDuality.MultisetScaleAdjunction ConcretePhysicsState PhysicsMacroDomain where
+Stage1.MultisetDuality.MultisetScaleDuality ConcretePhysicsState PhysicsMacroDomain where
   f_pushforward (MkConcretePhysics q) = MkPhysicsMacro q
   f_pullback (MkPhysicsMacro q)       = MkConcretePhysics q
   verifyUnit _   = Refl
@@ -121,7 +121,7 @@ proofPhysicsHomInv (AddM (val, MkAbstractPhysicsFunctor (MkPhysicsMacro q) b) w 
 
 ||| Category-Theoretic MultisetAdjunction instance L_Physics ⊣ R_Physics for physical scale space
 public export
-Stage1.MultisetDuality.MultisetAdjunction ConcretePhysicsFunctor AbstractPhysicsFunctor where
+Stage1.MultisetDuality.MultisetDuality ConcretePhysicsFunctor AbstractPhysicsFunctor where
   leftAdjoint x = MkConcretePhysicsFunctor (MkConcretePhysics (Stage0.BoxInt.intToBoxInt 0)) x
   rightAdjoint (MkConcretePhysicsFunctor _ x) = x
   homTensorIso = physicsHomTensorIso
@@ -129,10 +129,10 @@ Stage1.MultisetDuality.MultisetAdjunction ConcretePhysicsFunctor AbstractPhysics
   verifyHomIso = proofPhysicsHomIso
   verifyHomInv = proofPhysicsHomInv
 
-||| 2LTT Subfibration Reflection Functor instance coupling physics multiset adjunction with QTT 0 erased reflection
+||| 2LTT Subfibration Reflection Duality instance coupling physics multiset duality with QTT 0 erased reflection
 public export
-StrictReflectionFunctor ConcretePhysicsFunctor AbstractPhysicsFunctor where
-  reflectionAdjunction = %search
+StrictReflectionDuality ConcretePhysicsFunctor AbstractPhysicsFunctor where
+  reflectionDuality = %search
   reflectionRefl _ = Refl
 
 ||| ScaleTransform instance: Maps a 2D physical coordinate (Coord2D) to its spatial quadrance (BoxInt)
@@ -164,13 +164,13 @@ evalPhysicsChainPull = Stage1.MultisetDuality.evalChainPull
 ||| 2LTT Staged Action Integral: Evaluates total physical action quadrance from a streaming multiset
 ||| at compile-time Stage 1 (U_1) and splices out the unboxed scalar BoxInt to Stage 0 (U_0).
 %inline public export
-stagedPhysicsActionIntegral : Lift (Multiset Stage0.BoxInt.BoxInt Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
-stagedPhysicsActionIntegral liftedStream = multisetSum (splice liftedStream)
+stagedPhysicsActionIntegral : Lift (Stage0.Multiset.Carrier Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
+stagedPhysicsActionIntegral liftedStream = totalMassBox (splice liftedStream)
 
 ||| QTT 0 Erased Proof: Staged Multiset Action Integral Deforestation Invariant
 public export
-0 prfStagedActionDeforestation : (m : Multiset Stage0.BoxInt.BoxInt Stage0.BoxInt.BoxInt) ->
-                                 stagedPhysicsActionIntegral (quote m) = multisetSum m
+0 prfStagedActionDeforestation : (m : Stage0.Multiset.Carrier Stage0.BoxInt.BoxInt) ->
+                                 stagedPhysicsActionIntegral (quote m) = totalMassBox m
 prfStagedActionDeforestation _ = Refl
 
 

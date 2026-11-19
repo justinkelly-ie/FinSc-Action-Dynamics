@@ -21,14 +21,12 @@ import Data.List
 ||| J_CP = |Im(V_us V_cb V_ub* V_cs*)|
 ||| In standard SM physics, J_CP ~ 3.0 x 10^-5. In our exact parts-per-million representation,
 ||| J_CP is computed as 30 parts per 1,000,000.
-%inline
 public export
 jarlskogInvariantFraction : UnixelFraction
 jarlskogInvariantFraction = MkUnixelFraction (MkBoxInt 30) (MkUnixel 1000000)
 
 ||| Proves that the discrete Jarlskog invariant is strictly non-zero (J_CP > 0),
 ||| establishing exact CP violation in the quark flavor sector.
-%inline
 public export
 isCPViolating : UnixelFraction -> Bool
 isCPViolating (MkUnixelFraction (MkBoxInt n) _) = n > 0
@@ -102,7 +100,7 @@ proofJarlskogHomInv (AddM (val, MkAbstractJarlskogFunctor j b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance JarlskogFunctor ⊣ AbstractJarlskogFunctor
 public export
-MultisetAdjunction JarlskogFunctor AbstractJarlskogFunctor where
+MultisetDuality JarlskogFunctor AbstractJarlskogFunctor where
   leftAdjoint x = MkJarlskogFunctor jarlskogInvariantFraction x
   rightAdjoint (MkJarlskogFunctor _ x) = x
   homTensorIso = jarlskogHomTensorIso
@@ -117,7 +115,6 @@ MultisetAdjunction JarlskogFunctor AbstractJarlskogFunctor where
 ||| Audits Law 46 (Discrete Jarlskog CP-Violation Invariant):
 ||| 1. Proves J_CP > 0 (strict CP violation).
 ||| 2. Verifies exact rational fraction representation without floating point loss.
-%inline
 public export
 auditJarlskogCPViolationProof : Bool
 auditJarlskogCPViolationProof = isCPViolating jarlskogInvariantFraction

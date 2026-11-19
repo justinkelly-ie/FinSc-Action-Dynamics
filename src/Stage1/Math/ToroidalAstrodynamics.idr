@@ -80,7 +80,7 @@ Eq MassToken where
 public export
 evaluateQuadStreamMassToken : ToroidalPos -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> MassToken
 evaluateQuadStreamMassToken p (MkQuadStream e h q s) =
-  let totalM = multisetSum e + multisetSum h + multisetSum q + multisetSum s
+  let totalM = totalMassBox e + totalMassBox h + totalMassBox q + totalMassBox s
       z = Stage0.BoxInt.intToBoxInt 0
   in MkMassToken totalM p (z, z, z)
 
@@ -305,7 +305,7 @@ proofToroidalAstrodynamicsHomInv (AddM (val, MkAbstractToroidalAstrodynamicsFunc
   in cong (AddM (val, MkAbstractToroidalAstrodynamicsFunctor p b) w) rec
 
 public export
-MultisetAdjunction ToroidalAstrodynamicsFunctor AbstractToroidalAstrodynamicsFunctor where
+MultisetDuality ToroidalAstrodynamicsFunctor AbstractToroidalAstrodynamicsFunctor where
   leftAdjoint x = MkToroidalAstrodynamicsFunctor (MkToroidalPos (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 10)) x
   rightAdjoint (MkToroidalAstrodynamicsFunctor _ x) = x
   homTensorIso = toroidalAstrodynamicsHomTensorIso

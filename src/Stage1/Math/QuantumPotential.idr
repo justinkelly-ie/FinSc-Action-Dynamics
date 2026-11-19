@@ -31,7 +31,7 @@ discreteQuantumPotential lapR r =
 public export
 evaluateQuadStreamBohmianPotential : Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage1.UnixelFraction.UnixelFraction
 evaluateQuadStreamBohmianPotential lapR (MkQuadStream e h p s) =
-  let rVal = boxIntToPositiveNat (multisetSum e + multisetSum h)
+  let rVal = boxIntToPositiveNat (totalMassBox e + totalMassBox h)
   in discreteQuantumPotential lapR rVal
 
 ||| Total Discrete Bohmian Particle Energy along a causal trajectory:
@@ -104,7 +104,7 @@ proofBohmianPotentialHomInv (AddM (val, MkAbstractBohmianPotentialFunctor q b) w
 
 ||| Category-Theoretic MultisetAdjunction instance BohmianPotentialFunctor ⊣ AbstractBohmianPotentialFunctor
 public export
-MultisetAdjunction BohmianPotentialFunctor AbstractBohmianPotentialFunctor where
+MultisetDuality BohmianPotentialFunctor AbstractBohmianPotentialFunctor where
   leftAdjoint x = MkBohmianPotentialFunctor zeroUnixelFraction x
   rightAdjoint (MkBohmianPotentialFunctor _ x) = x
   homTensorIso = bohmianPotentialHomTensorIso

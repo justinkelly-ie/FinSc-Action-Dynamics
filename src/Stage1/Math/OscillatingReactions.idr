@@ -38,9 +38,9 @@ Eq BZState where
 public export
 evaluateQuadStreamBZState : QuadStreamMultiset BoxInt -> BZState
 evaluateQuadStreamBZState (MkQuadStream e h p s) =
-  let x = multisetSum e
-      y = multisetSum h
-      z = multisetSum p
+  let x = totalMassBox e
+      y = totalMassBox h
+      z = totalMassBox p
   in MkBZState x y z
 
 ------------------------------------------------------------------------
@@ -48,7 +48,6 @@ evaluateQuadStreamBZState (MkQuadStream e h p s) =
 ------------------------------------------------------------------------
 
 ||| Helper: checks if a BoxInt token value is strictly negative.
-%inline
 public export
 boxNegative : Stage0.BoxInt.BoxInt -> Bool
 boxNegative b = b < Stage0.BoxInt.intToBoxInt 0
@@ -154,7 +153,7 @@ proofBZHomInv (AddM (val, MkAbstractBZFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractBZFunctor s b) w) rec
 
 public export
-MultisetAdjunction BZFunctor AbstractBZFunctor where
+MultisetDuality BZFunctor AbstractBZFunctor where
   leftAdjoint x = MkBZFunctor (MkBZState (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkBZFunctor _ x) = x
   homTensorIso = bzHomTensorIso

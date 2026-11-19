@@ -32,8 +32,8 @@ Eq LaughlinState where
 public export
 evaluateQuadStreamLaughlin : QuadStreamMultiset Stage0.BoxInt.BoxInt -> LaughlinState
 evaluateQuadStreamLaughlin (MkQuadStream e h p s) =
-  let pVal = boxIntToPositiveNat (multisetSum e)
-      qVal = boxIntToPositiveNat (multisetSum h)
+  let pVal = boxIntToPositiveNat (totalMassBox e)
+      qVal = boxIntToPositiveNat (totalMassBox h)
   in MkLaughlinState pVal qVal
 
 ||| Computes the fractional charge of a Laughlin quasiparticle excitation e* = (p/q) * e:
@@ -119,7 +119,7 @@ proofLaughlinHomInv (AddM (val, MkAbstractLaughlinFunctor state b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance LaughlinFunctor ⊣ AbstractLaughlinFunctor
 public export
-MultisetAdjunction LaughlinFunctor AbstractLaughlinFunctor where
+MultisetDuality LaughlinFunctor AbstractLaughlinFunctor where
   leftAdjoint x = MkLaughlinFunctor (MkLaughlinState 1 1) x
   rightAdjoint (MkLaughlinFunctor _ x) = x
   homTensorIso = laughlinHomTensorIso

@@ -219,7 +219,7 @@ proofDiracSpinorHomInv (AddM (val, MkAbstractDiracSpinorFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractDiracSpinorFunctor s b) w) rec
 
 public export
-MultisetAdjunction DiracSpinorFunctor AbstractDiracSpinorFunctor where
+MultisetDuality DiracSpinorFunctor AbstractDiracSpinorFunctor where
   leftAdjoint x = MkDiracSpinorFunctor (MkDiracSpinor4 (MkPixel 0 0) (MkPixel 0 0) (MkPixel 0 0) (MkPixel 0 0)) x
   rightAdjoint (MkDiracSpinorFunctor _ x) = x
   homTensorIso = diracSpinorHomTensorIso

@@ -126,7 +126,7 @@ proofCrooksFluctuationHomInv (AddM (val, MkAbstractCrooksFluctuationFunctor traj
 
 ||| Category-Theoretic MultisetAdjunction instance CrooksFluctuationFunctor ⊣ AbstractCrooksFluctuationFunctor
 public export
-MultisetAdjunction CrooksFluctuationFunctor AbstractCrooksFluctuationFunctor where
+MultisetDuality CrooksFluctuationFunctor AbstractCrooksFluctuationFunctor where
   leftAdjoint x = MkCrooksFluctuationFunctor (MkTrajectoryWork (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkCrooksFluctuationFunctor _ x) = x
   homTensorIso = crooksFluctuationHomTensorIso

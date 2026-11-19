@@ -33,9 +33,9 @@ discreteRunningCoupling (MkVacuumPolarization alpha0 qSq cutoff) =
 public export
 evaluateQuadStreamRunningCoupling : QuadStreamMultiset Stage0.BoxInt.BoxInt -> UnixelFraction
 evaluateQuadStreamRunningCoupling (MkQuadStream e h p s) =
-  let alpha0 = mkUnixelFraction (multisetSum e) 137
-      qSq = mkUnixelFraction (multisetSum h) 1
-      cutoff = boxIntToPositiveNat (multisetSum p)
+  let alpha0 = mkUnixelFraction (totalMassBox e) 137
+      qSq = mkUnixelFraction (totalMassBox h) 1
+      cutoff = boxIntToPositiveNat (totalMassBox p)
       loop = MkVacuumPolarization alpha0 qSq cutoff
   in discreteRunningCoupling loop
 
@@ -105,7 +105,7 @@ proofVacuumPolarizationHomInv (AddM (val, MkAbstractVacuumPolarizationFunctor lo
 
 ||| Category-Theoretic MultisetAdjunction instance VacuumPolarizationFunctor ⊣ AbstractVacuumPolarizationFunctor
 public export
-MultisetAdjunction VacuumPolarizationFunctor AbstractVacuumPolarizationFunctor where
+MultisetDuality VacuumPolarizationFunctor AbstractVacuumPolarizationFunctor where
   leftAdjoint x = MkVacuumPolarizationFunctor (MkVacuumPolarization zeroUnixelFraction zeroUnixelFraction 0) x
   rightAdjoint (MkVacuumPolarizationFunctor _ x) = x
   homTensorIso = vacuumPolarizationHomTensorIso

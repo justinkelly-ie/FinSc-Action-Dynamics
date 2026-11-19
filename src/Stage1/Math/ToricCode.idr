@@ -4,6 +4,8 @@ import Stage0.BoxInt
 import Stage0.WitnessLedger
 import Stage1.UnixelFraction
 import Stage0.Multiset
+import Stage0.HereditaryMSet
+import Stage0.SignedBit
 import Stage0.OnSeq.FusedStream
 import Stage1.QuadStream
 import Stage1.WilsonPolyhedra
@@ -77,7 +79,7 @@ synthesizeToricLattice l =
 public export
 evaluateQuadStreamToricLattice : QuadStreamMultiset BoxInt -> ToricCodeLattice
 evaluateQuadStreamToricLattice (MkQuadStream e h p s) =
-  let l = boxIntToPositiveNat (multisetSum e)
+  let l = boxIntToPositiveNat (totalMassBox e)
   in synthesizeToricLattice l
 
 ||| Evaluates error syndrome for a single bit-flip error (creates 2 plaquette defects):
@@ -147,13 +149,20 @@ auditToricCodeProof =
   let lattice = synthesizeToricLattice 4
       syndrome = detectSingleBitFlip lattice
       streamDefects = countStreamAnyonDefects 16 (toricSyndromeStream lattice)
-      
+
+      z2PlaquetteA : HereditaryMSet MultisetBit
+      z2PlaquetteA = MkHMSet (setBox (MkHMSet BoxLeaf) OneBit BoxLeaf)
+      z2PlaquetteB : HereditaryMSet MultisetBit
+      z2PlaquetteB = MkHMSet (setBox z2PlaquetteA OneBit BoxLeaf)
+      flippedPair  = z2PlaquetteA <+> z2PlaquetteB
+      z2Recovered  = (flippedPair <+> flippedPair) == emptyHMSet
+
       tPhys = numPhysicalQubits lattice == 32
       tLogical = numLogicalQubits lattice == 2
       tDist = codeDistance lattice == 4
       tDefects = numAnyonDefects syndrome == 2
       tStreamDefects = streamDefects == 2
-  in tPhys && tLogical && tDist && tDefects && tStreamDefects
+  in tPhys && tLogical && tDist && tDefects && tStreamDefects && z2Recovered
 
 --------------------------------------------------------------------------------
 -- 4. CATEGORY-THEORETIC HOM-TENSOR MULTISET ADJUNCTION (L ⊣ R)
@@ -219,7 +228,7 @@ proofToricCodeHomInv (AddM (val, MkAbstractToricCodeFunctor lat b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance ToricCodeFunctor ⊣ AbstractToricCodeFunctor
 public export
-MultisetAdjunction ToricCodeFunctor AbstractToricCodeFunctor where
+MultisetDuality ToricCodeFunctor AbstractToricCodeFunctor where
   leftAdjoint x = MkToricCodeFunctor (synthesizeToricLattice 1) x
   rightAdjoint (MkToricCodeFunctor _ x) = x
   homTensorIso = toricCodeHomTensorIso

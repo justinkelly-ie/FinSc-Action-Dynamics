@@ -1,6 +1,7 @@
 module Stage1.Math.GalacticRotationCurve
 
 import Stage0.BoxInt
+import Stage0.Interfaces
 import Stage1.Basis.Coordinate
 import Stage1.UnixelFraction
 import Stage0.Multiset
@@ -40,17 +41,17 @@ public export
 enclosedMass : GalacticProfile -> (radius : Stage0.BoxInt.BoxInt) -> Stage0.BoxInt.BoxInt
 enclosedMass (MkGalacticProfile m0 k) r = m0 + (k * r)
 
-||| Evaluates enclosed baryonic mass from a deforested stream of mass tokens in O(1) registers (Rule 04 §8):
+||| Evaluates enclosed baryonic mass from a deforested stream of carrier entries in O(1) registers (Rule 04 §8):
 public export
-enclosedMassStream : BoxInt -> FusedStream (Token (CoordCell 1)) -> BoxInt
+enclosedMassStream : BoxInt -> FusedStream (CoordCell 1, BoxInt) -> BoxInt
 enclosedMassStream radius strm =
-  foldStream (\acc, (MkToken c) =>
+  foldStream (\acc, (c, _) =>
     let r = natToBoxInt (unwrapUnixel c)
     in if r <= radius then acc + intToBoxInt 1 else acc) (intToBoxInt 0) strm
 
-||| Evaluates total galactic mass from a deforested mass token stream:
+||| Evaluates total galactic mass from a deforested stream of carrier entries:
 public export
-totalMassStream : FusedStream (Token (CoordCell 1)) -> BoxInt
+totalMassStream : FusedStream (CoordCell 1, BoxInt) -> BoxInt
 totalMassStream strm =
   foldStream (\acc, _ => acc + intToBoxInt 1) (intToBoxInt 0) strm
 
@@ -75,23 +76,35 @@ public export
 Show PhasePoint where
   show (MkPhasePoint r v m) = "P(" ++ show (unwrapBox r) ++ "," ++ show (unwrapBox v) ++ "," ++ show (unwrapBox m) ++ ")"
 
-||| A galactic halo represented as a constructive multiset of phase-space quanta:
+public export
+Ord PhasePoint where
+  compare (MkPhasePoint r1 v1 m1) (MkPhasePoint r2 v2 m2) =
+    case compare r1 r2 of
+      EQ => case compare v1 v2 of
+              EQ => compare m1 m2
+              o => o
+      o => o
+
+public export
+DiscreteCoord PhasePoint where
+
+||| A galactic halo represented as a constructive carrier of phase-space quanta:
 public export
 GalacticHaloMultiset : Type
-GalacticHaloMultiset = Multiset BoxInt PhasePoint
+GalacticHaloMultiset = Carrier PhasePoint
 
-||| Evaluates enclosed mass at radius rCut along a deforested stream of phase-space tokens (Rule 04 §8):
+||| Evaluates enclosed mass at radius rCut along a deforested stream of phase-space carrier entries (Rule 04 §8):
 public export
-enclosedPhaseMassStream : BoxInt -> FusedStream (Token PhasePoint) -> BoxInt
+enclosedPhaseMassStream : BoxInt -> FusedStream (PhasePoint, BoxInt) -> BoxInt
 enclosedPhaseMassStream rCut strm =
-  foldStream (\acc, (MkToken p) =>
+  foldStream (\acc, (p, _) =>
     if p.radius <= rCut then addBox acc p.massQuantum else acc) (MkBoxInt 0) strm
 
-||| Evaluates total halo mass from a deforested stream of phase-space tokens:
+||| Evaluates total halo mass from a deforested stream of phase-space carrier entries:
 public export
-totalPhaseMassStream : FusedStream (Token PhasePoint) -> BoxInt
+totalPhaseMassStream : FusedStream (PhasePoint, BoxInt) -> BoxInt
 totalPhaseMassStream strm =
-  foldStream (\acc, (MkToken p) => addBox acc p.massQuantum) (MkBoxInt 0) strm
+  foldStream (\acc, (p, _) => addBox acc p.massQuantum) (MkBoxInt 0) strm
 
 ||| Single-step discrete symplectic leapfrog phase point update on a virialized circular orbital shell,
 ||| conserving phase token mass quantum and shell radius (Rule 04 §1):
@@ -110,19 +123,32 @@ stepPhasePointNonLinear g pt =
   let MkLToken nextPt = symplecticLeapfrogTokenStep g (MkLToken pt)
   in nextPt
 
-||| Updates an entire galactic halo multiset under central gravitational acceleration g:
+||| Updates an entire galactic halo carrier under central gravitational acceleration g.
 public export
 stepGalacticHaloMass : BoxInt -> GalacticHaloMultiset -> GalacticHaloMultiset
-stepGalacticHaloMass g ZeroM = ZeroM
-stepGalacticHaloMass g (AddM pt w rest) =
-  AddM (stepPhasePointNonLinear g pt) w (stepGalacticHaloMass g rest)
+stepGalacticHaloMass g =
+  foldBoxTreeL (\acc, (MkPhasePoint r v m, w) =>
+    if boxIsZero r
+      then let gm = mulBox g m
+               accel = if boxIsNonZero gm && gm >= intToBoxInt 0 && gm < intToBoxInt 1
+                         then intToBoxInt 0
+                         else divBox gm (intToBoxInt 1)
+           in acc <+> singletonCarrier (MkPhasePoint (MkBoxInt 1) (subBox v accel) m) w
+      else let r2 = mulBox r r
+               gm = mulBox g m
+               accel = if g >= intToBoxInt 0 && m >= intToBoxInt 0 && gm < r2
+                         then intToBoxInt 0
+                         else divBox gm r2
+           in if boxIsZero accel
+                then acc <+> singletonCarrier (MkPhasePoint r v m) w
+                else acc <+> singletonCarrier (MkPhasePoint r (subBox v accel) m) w) neutral
 
-||| Canonical 2-point galactic halo multiset:
+||| Canonical 2-point galactic halo carrier:
 public export
 canonicalGalacticHalo : GalacticHaloMultiset
 canonicalGalacticHalo =
-  AddM (MkPhasePoint (MkBoxInt 5) (MkBoxInt 20) (MkBoxInt 50)) (MkBoxInt 1)
-  (AddM (MkPhasePoint (MkBoxInt 15) (MkBoxInt 22) (MkBoxInt 50)) (MkBoxInt 1) ZeroM)
+  singletonCarrier (MkPhasePoint (MkBoxInt 5) (MkBoxInt 20) (MkBoxInt 50)) (MkBoxInt 1) <+>
+  singletonCarrier (MkPhasePoint (MkBoxInt 15) (MkBoxInt 22) (MkBoxInt 50)) (MkBoxInt 1)
 
 ------------------------------------------------------------------------
 -- 1c. NEWTONIAN & EMERGENT ROTATION VELOCITY PROFILES
@@ -153,8 +179,8 @@ emergentRotationVelocitySquared g slope gal r =
 public export
 evaluateGalacticQuadStreamRotation : Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateGalacticQuadStreamRotation g slope (MkQuadStream e h p s) r =
-  let coreM = multisetSum e
-      diskK = multisetSum h
+  let coreM = totalMassBox e
+      diskK = totalMassBox h
       gal = MkGalacticProfile coreM diskK
   in emergentRotationVelocitySquared g slope gal r
 
@@ -300,7 +326,7 @@ emergentRotationVelocityHalo : (gConst : BoxInt) -> (dragSlope : BoxInt) ->
                                GalacticProfile -> GalacticHaloMultiset -> (radius : BoxInt) -> BoxInt
 emergentRotationVelocityHalo g slope gal halo r =
   let mBaryon = enclosedMass gal r
-      mHalo   = enclosedPhaseMassStream r (streamTokens halo)
+      mHalo   = enclosedPhaseMassStream r (streamBoxMultisetTree halo)
       mTotal  = addBox mBaryon mHalo
       rVal    = if boxIsZero r then intToBoxInt 1 else r
       dragFactor = intToBoxInt 1 + (slope * rVal)
@@ -406,7 +432,7 @@ proofGalacticProfileHomInv (AddM (val, MkAbstractGalacticProfileFunctor gal b) w
 
 ||| Category-Theoretic MultisetAdjunction instance GalacticProfileFunctor ⊣ AbstractGalacticProfileFunctor
 public export
-MultisetAdjunction GalacticProfileFunctor AbstractGalacticProfileFunctor where
+MultisetDuality GalacticProfileFunctor AbstractGalacticProfileFunctor where
   leftAdjoint x = MkGalacticProfileFunctor (MkGalacticProfile (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkGalacticProfileFunctor _ x) = x
   homTensorIso = galacticProfileHomTensorIso
@@ -498,13 +524,13 @@ auditProject10Dto4DDirectProof =
 public export
 auditGalacticMassStreamingProof : Bool
 auditGalacticMassStreamingProof =
-  let m = the (Multiset BoxInt (CoordCell 1))
-            (AddM (mkCell1 5) (intToBoxInt 1)
-              (AddM (mkCell1 15) (intToBoxInt 1)
-                (AddM (mkCell1 25) (intToBoxInt 1) ZeroM)))
-      strm = streamTokens m
+  let m = the (Carrier (CoordCell 1))
+            (singletonCarrier (mkCell1 5) (intToBoxInt 1) <+>
+             singletonCarrier (mkCell1 15) (intToBoxInt 1) <+>
+             singletonCarrier (mkCell1 25) (intToBoxInt 1))
+      strm = streamBoxMultisetTree m
       mEnclosed = enclosedMassStream (intToBoxInt 15) strm
-      mTotal = totalMassStream (streamTokens m)
+      mTotal = totalMassStream (streamBoxMultisetTree m)
   in (mEnclosed == intToBoxInt 2) && (mTotal == intToBoxInt 3)
 
 ||| Discrete Liouville Theorem: Symplectic time-stepping preserves phase token mass identity:
@@ -522,9 +548,9 @@ auditPhaseSpaceHaloStreamProof : Bool
 auditPhaseSpaceHaloStreamProof =
   let pt1 = MkPhasePoint (MkBoxInt 5) (MkBoxInt 20) (MkBoxInt 50)
       pt2 = MkPhasePoint (MkBoxInt 15) (MkBoxInt 22) (MkBoxInt 50)
-      halo = the GalacticHaloMultiset (AddM pt1 (MkBoxInt 1) (AddM pt2 (MkBoxInt 1) ZeroM))
-      mEnclosed5 = enclosedPhaseMassStream (MkBoxInt 10) (streamTokens halo)
-      mTotal = totalPhaseMassStream (streamTokens halo)
+      halo = the GalacticHaloMultiset (singletonCarrier pt1 (MkBoxInt 1) <+> singletonCarrier pt2 (MkBoxInt 1))
+      mEnclosed5 = enclosedPhaseMassStream (MkBoxInt 10) (streamBoxMultisetTree halo)
+      mTotal = totalPhaseMassStream (streamBoxMultisetTree halo)
   in boxEq mEnclosed5 (MkBoxInt 50) && boxEq mTotal (MkBoxInt 100)
 
 ||| Compile-time witness: Symplectic leapfrog preserves mass quantum definitionally.

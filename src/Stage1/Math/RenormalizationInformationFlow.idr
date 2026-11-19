@@ -49,8 +49,8 @@ discreteFisherQuadrance w1 w2 =
 public export
 evaluateQuadStreamFisherQuadrance : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage1.UnixelFraction.UnixelFraction
 evaluateQuadStreamFisherQuadrance (MkQuadStream e h p s) =
-  let w1 = natVal (multisetSum e)
-      w2 = natVal (multisetSum h)
+  let w1 = natVal (totalMassBox e)
+      w2 = natVal (totalMassBox h)
   in discreteFisherQuadrance w1 w2
   where
     natVal : Stage0.BoxInt.BoxInt -> Nat
@@ -183,7 +183,7 @@ proofRenormalizationHomInv (AddM (val, MkAbstractRenormalizationFunctor s b) w r
   in cong (AddM (val, MkAbstractRenormalizationFunctor s b) w) rec
 
 public export
-MultisetAdjunction RenormalizationFunctor AbstractRenormalizationFunctor where
+MultisetDuality RenormalizationFunctor AbstractRenormalizationFunctor where
   leftAdjoint x = MkRenormalizationFunctor (MkRenormalizationState 0) x
   rightAdjoint (MkRenormalizationFunctor _ x) = x
   homTensorIso = renormalizationHomTensorIso

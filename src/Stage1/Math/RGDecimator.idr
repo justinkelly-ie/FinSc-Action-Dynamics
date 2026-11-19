@@ -50,10 +50,10 @@ Eq Plaquette2x2 where
 public export
 evaluateQuadStreamPlaquette : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Plaquette2x2
 evaluateQuadStreamPlaquette (MkQuadStream e h p s) =
-  let f00 = multisetSum e
-      f01 = multisetSum h
-      f10 = multisetSum p
-      f11 = multisetSum s
+  let f00 = totalMassBox e
+      f01 = totalMassBox h
+      f10 = totalMassBox p
+      f11 = totalMassBox s
   in MkPlaquette2x2 f00 f01 f10 f11
 
 ||| Macro Plaquette aggregated from 2x2 microcells:
@@ -236,7 +236,7 @@ proofRGHomInv (AddM (val, MkAbstractRGFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractRGFunctor s b) w) rec
 
 public export
-MultisetAdjunction RGFunctor AbstractRGFunctor where
+MultisetDuality RGFunctor AbstractRGFunctor where
   leftAdjoint x = MkRGFunctor (MkRGState 1) x
   rightAdjoint (MkRGFunctor _ x) = x
   homTensorIso = rgHomTensorIso

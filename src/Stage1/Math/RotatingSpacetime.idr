@@ -39,9 +39,9 @@ Eq KerrBlackHole where
 public export
 evaluateQuadStreamKerr : QuadStreamMultiset BoxInt -> KerrBlackHole
 evaluateQuadStreamKerr (MkQuadStream e h p s) =
-  let m = multisetSum e
-      a = multisetSum h
-      rPlus = multisetSum e + multisetSum p
+  let m = totalMassBox e
+      a = totalMassBox h
+      rPlus = totalMassBox e + totalMassBox p
       rErgo = intToBoxInt 2 * m
   in MkKerr m a rPlus rErgo
 
@@ -140,7 +140,7 @@ proofKerrHomInv (AddM (val, MkAbstractKerrFunctor k b) w rest) =
   in cong (AddM (val, MkAbstractKerrFunctor k b) w) rec
 
 public export
-MultisetAdjunction KerrFunctor AbstractKerrFunctor where
+MultisetDuality KerrFunctor AbstractKerrFunctor where
   leftAdjoint x = MkKerrFunctor (MkKerr (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkKerrFunctor _ x) = x
   homTensorIso = kerrHomTensorIso

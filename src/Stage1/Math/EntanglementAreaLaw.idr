@@ -70,8 +70,8 @@ computeRyuTakayanagiEntropy sys =
 public export
 evaluateQuadStreamRyuTakayanagi : QuadStreamMultiset BoxInt -> HolographicEntanglement
 evaluateQuadStreamRyuTakayanagi (MkQuadStream e h p s) =
-  let lA = boxIntToPositiveNat (multisetSum e)
-      tA = boxIntToPositiveNat (multisetSum e + multisetSum h + multisetSum p + multisetSum s)
+  let lA = boxIntToPositiveNat (totalMassBox e)
+      tA = boxIntToPositiveNat (totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s)
       sys = MkSubsystem lA tA
   in computeRyuTakayanagiEntropy sys
 
@@ -139,7 +139,7 @@ proofRyuTakayanagiHomInv (AddM (val, MkAbstractRyuTakayanagiFunctor h b) w rest)
 
 ||| Category-Theoretic MultisetAdjunction instance RyuTakayanagiFunctor ⊣ AbstractRyuTakayanagiFunctor
 public export
-MultisetAdjunction RyuTakayanagiFunctor AbstractRyuTakayanagiFunctor where
+MultisetDuality RyuTakayanagiFunctor AbstractRyuTakayanagiFunctor where
   leftAdjoint x = MkRyuTakayanagiFunctor (MkHEntropy (MkSubsystem 0 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkRyuTakayanagiFunctor _ x) = x
   homTensorIso = ryuTakayanagiHomTensorIso

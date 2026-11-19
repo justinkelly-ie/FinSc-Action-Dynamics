@@ -63,11 +63,11 @@ Eq RelativisticEnergyDomain where
 public export
 quadStreamToRelativisticEnergy : QuadStreamMultiset BoxInt -> RelativisticEnergyDomain
 quadStreamToRelativisticEnergy (MkQuadStream e h p s) =
-  MkRelativisticEnergyDomain (multisetSum e + multisetSum h + multisetSum p + multisetSum s)
+  MkRelativisticEnergyDomain (totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s)
 
 ||| MultisetScaleAdjunction instance between RelativisticRestMassDomain and RelativisticEnergyDomain
 public export
-MultisetScaleAdjunction RelativisticRestMassDomain RelativisticEnergyDomain where
+MultisetScaleDuality RelativisticRestMassDomain RelativisticEnergyDomain where
   f_pushforward (MkRestMassDomain m) = MkRelativisticEnergyDomain m
   f_pullback (MkRelativisticEnergyDomain e) = MkRestMassDomain e
   verifyUnit _   = Refl
@@ -133,7 +133,7 @@ proofRelMassEnergyHomInv (AddM (val, MkRelativisticEnergyFunctor (MkRelativistic
 
 ||| Category-Theoretic MultisetAdjunction instance L_RestMass ⊣ R_RelativisticEnergy
 public export
-MultisetAdjunction RestMassFunctor RelativisticEnergyFunctor where
+MultisetDuality RestMassFunctor RelativisticEnergyFunctor where
   leftAdjoint x = MkRestMassFunctor (MkRestMassDomain (intToBoxInt 0)) x
   rightAdjoint (MkRestMassFunctor _ x) = x
   homTensorIso = relMassEnergyHomTensorIso
@@ -142,8 +142,8 @@ MultisetAdjunction RestMassFunctor RelativisticEnergyFunctor where
   verifyHomInv = proofRelMassEnergyHomInv
 
 public export
-StrictReflectionFunctor RestMassFunctor RelativisticEnergyFunctor where
-  reflectionAdjunction = %search
+StrictReflectionDuality RestMassFunctor RelativisticEnergyFunctor where
+  reflectionDuality = %search
   reflectionRefl _ = Refl
 
 --------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ StrictReflectionFunctor RestMassFunctor RelativisticEnergyFunctor where
 --------------------------------------------------------------------------------
 
 ||| Deforested 2LTT staged code generator transducer for Relativistic energy-momentum evaluation.
-%inline public export
+public export
 stagedRelativisticPipeline : QuadStreamMultiset BoxInt -> Code RelativisticEnergyDomain
 stagedRelativisticPipeline qs = quote (quadStreamToRelativisticEnergy qs)
 

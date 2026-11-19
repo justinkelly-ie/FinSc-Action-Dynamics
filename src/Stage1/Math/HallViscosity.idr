@@ -34,7 +34,7 @@ discreteHallViscosity s filling =
 public export
 evaluateQuadStreamHallViscosity : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage1.UnixelFraction.UnixelFraction -> Stage1.UnixelFraction.UnixelFraction
 evaluateQuadStreamHallViscosity (MkQuadStream e h p s) filling =
-  let spin = multisetSum e - multisetSum h
+  let spin = totalMassBox e - totalMassBox h
   in discreteHallViscosity spin filling
 
 ||| Proves that Hall Viscosity is strictly dissipationless (anti-symmetric stress tensor):
@@ -112,7 +112,7 @@ proofHallViscosityHomInv (AddM (val, MkAbstractHallViscosityFunctor eta b) w res
 
 ||| Category-Theoretic MultisetAdjunction instance HallViscosityFunctor ⊣ AbstractHallViscosityFunctor
 public export
-MultisetAdjunction HallViscosityFunctor AbstractHallViscosityFunctor where
+MultisetDuality HallViscosityFunctor AbstractHallViscosityFunctor where
   leftAdjoint x = MkHallViscosityFunctor zeroUnixelFraction x
   rightAdjoint (MkHallViscosityFunctor _ x) = x
   homTensorIso = hallViscosityHomTensorIso

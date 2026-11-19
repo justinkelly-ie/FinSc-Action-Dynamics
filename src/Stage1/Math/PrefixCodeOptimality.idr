@@ -38,10 +38,10 @@ isValidPrefixCode maxL lengths =
 public export
 evaluateQuadStreamPrefixCode : QuadStreamMultiset Stage0.BoxInt.BoxInt -> List Nat
 evaluateQuadStreamPrefixCode (MkQuadStream e h p s) =
-  let lE = boxIntToPositiveNat (multisetSum e)
-      lH = boxIntToPositiveNat (multisetSum h)
-      lP = boxIntToPositiveNat (multisetSum p)
-      lS = boxIntToPositiveNat (multisetSum s)
+  let lE = boxIntToPositiveNat (totalMassBox e)
+      lH = boxIntToPositiveNat (totalMassBox h)
+      lP = boxIntToPositiveNat (totalMassBox p)
+      lS = boxIntToPositiveNat (totalMassBox s)
   in [lE, lH, lP, lS]
 
 ||| Computes Stern-Brocot tree path depth with structural termination fuel:
@@ -215,7 +215,7 @@ proofPrefixCodeHomInv (AddM (val, MkAbstractPrefixCodeFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractPrefixCodeFunctor s b) w) rec
 
 public export
-MultisetAdjunction PrefixCodeFunctor AbstractPrefixCodeFunctor where
+MultisetDuality PrefixCodeFunctor AbstractPrefixCodeFunctor where
   leftAdjoint x = MkPrefixCodeFunctor (MkPrefixCodeState 3) x
   rightAdjoint (MkPrefixCodeFunctor _ x) = x
   homTensorIso = prefixCodeHomTensorIso

@@ -41,8 +41,8 @@ discreteAxialCurrentDivergence m j5 q =
 public export
 evaluateQuadStreamAxialDivergence : Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamAxialDivergence m (MkQuadStream e h p s) =
-  let j5 = multisetSum e - multisetSum h
-      qTop = multisetSum p - multisetSum s
+  let j5 = totalMassBox e - totalMassBox h
+      qTop = totalMassBox p - totalMassBox s
   in discreteAxialCurrentDivergence m j5 qTop
 
 ||| Validates the Atiyah-Singer Index Theorem on discrete lattices:
@@ -159,7 +159,7 @@ proofChiralAnomalyHomInv (AddM (val, MkAbstractChiralAnomalyFunctor state b) w r
 
 ||| Category-Theoretic MultisetAdjunction instance ChiralAnomalyFunctor ⊣ AbstractChiralAnomalyFunctor
 public export
-MultisetAdjunction ChiralAnomalyFunctor AbstractChiralAnomalyFunctor where
+MultisetDuality ChiralAnomalyFunctor AbstractChiralAnomalyFunctor where
   leftAdjoint x = MkChiralAnomalyFunctor (MkChiralState 0 0 (intToBoxInt 0)) x
   rightAdjoint (MkChiralAnomalyFunctor _ x) = x
   homTensorIso = chiralAnomalyHomTensorIso

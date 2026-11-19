@@ -33,10 +33,10 @@ import Stage1.Math.CosmicGenesis
 public export
 record QuadStreamSectorPipeline where
   constructor MkSectorPipeline
-  ellipticLaw  : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
-  hyperbolicLaw: Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
-  parabolicLaw : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
-  substrateLaw : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
+  ellipticLaw  : Carrier BoxInt -> Carrier BoxInt
+  hyperbolicLaw: Carrier BoxInt -> Carrier BoxInt
+  parabolicLaw : Carrier BoxInt -> Carrier BoxInt
+  substrateLaw : Carrier BoxInt -> Carrier BoxInt
 
 ||| Canonical QuadStream catalog pipeline aggregating the core physical laws:
 public export
@@ -44,13 +44,13 @@ canonicalQuadStreamCatalogPipeline : QuadStreamSectorPipeline
 canonicalQuadStreamCatalogPipeline =
   MkSectorPipeline
     -- Elliptic: Peak binding energy and Kepler bound-state preservation
-    (\e => filterMultiset (\v => boxLTE (intToBoxInt 0) v) e)
+    (\e => filterBox (\v => boxLTE (intToBoxInt 0) v) e)
     -- Hyperbolic: Gauge flux and lightcone phase preservation
-    (\h => filterMultiset (\v => boxLTE (intToBoxInt 0) v) h)
+    (\h => filterBox (\v => boxLTE (intToBoxInt 0) v) h)
     -- Parabolic: Remainder dissipation drain and 45-moduli dark matter drag
     (\p =>
       let moduliDrag = metricModuliDragSlope
-      in AddM moduliDrag (intToBoxInt 0) p)
+      in p <+> singletonCarrier moduliDrag (intToBoxInt 0))
     -- Substrate: Causal free energy minimization towards F = -1320
     (\s => s)
 
@@ -122,14 +122,14 @@ public export
 auditCatalogPipelinePartitionProof : Bool
 auditCatalogPipelinePartitionProof =
   let qs0 = MkQuadStream
-              (AddM (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) ZeroM)
-              (AddM (intToBoxInt 2) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity) ZeroM)
-              (AddM (intToBoxInt 3) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) ZeroM)
-              (AddM (intToBoxInt 4) (intToBoxInt 0) ZeroM)
+              (singletonCarrier (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity))
+              (singletonCarrier (intToBoxInt 2) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity))
+              (singletonCarrier (intToBoxInt 3) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue))
+              (singletonCarrier (intToBoxInt 4) (intToBoxInt 0))
       qs1 = executeQuadStreamCatalogPipeline 10 canonicalQuadStreamCatalogPipeline qs0
-      mE = multisetSum qs1.ellipticStream
-      mH = multisetSum qs1.hyperbolicStream
-      mP = multisetSum qs1.parabolicStream
+      mE = totalMassBox qs1.ellipticStream
+      mH = totalMassBox qs1.hyperbolicStream
+      mP = totalMassBox qs1.parabolicStream
   in (mE == natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) &&
      (mH == natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity) &&
      (mP == natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue)

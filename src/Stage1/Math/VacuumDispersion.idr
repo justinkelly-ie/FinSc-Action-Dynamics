@@ -50,7 +50,7 @@ discreteCasimirForce (S k) =
 public export
 evaluateQuadStreamCasimirForce : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamCasimirForce (MkQuadStream e h p s) =
-  let d = boxIntToPositiveNat (multisetSum e)
+  let d = boxIntToPositiveNat (totalMassBox e)
   in discreteCasimirForce d
 
 ------------------------------------------------------------------------
@@ -139,7 +139,7 @@ proofVacuumDispersionHomInv (AddM (val, MkAbstractVacuumDispersionFunctor c b) w
   in cong (AddM (val, MkAbstractVacuumDispersionFunctor c b) w) rec
 
 public export
-MultisetAdjunction VacuumDispersionFunctor AbstractVacuumDispersionFunctor where
+MultisetDuality VacuumDispersionFunctor AbstractVacuumDispersionFunctor where
   leftAdjoint x = MkVacuumDispersionFunctor (MkCavityBoundary 1) x
   rightAdjoint (MkVacuumDispersionFunctor _ x) = x
   homTensorIso = vacuumDispersionHomTensorIso

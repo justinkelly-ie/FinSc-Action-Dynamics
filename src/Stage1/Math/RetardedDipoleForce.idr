@@ -40,7 +40,7 @@ discreteCasimirPolderPotential c7 q =
 public export
 evaluateQuadStreamCasimirPolder : Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage1.UnixelFraction.UnixelFraction
 evaluateQuadStreamCasimirPolder c7 (MkQuadStream e h p s) =
-  let qVal = boxIntToPositiveNat (multisetSum e + multisetSum h)
+  let qVal = boxIntToPositiveNat (totalMassBox e + totalMassBox h)
   in discreteCasimirPolderPotential c7 qVal
 
 ||| Validates that both London and Casimir-Polder forces are strictly attractive (negative potential):
@@ -127,7 +127,7 @@ proofRetardedDipoleHomInv (AddM (val, MkAbstractRetardedDipoleFunctor s b) w res
   in cong (AddM (val, MkAbstractRetardedDipoleFunctor s b) w) rec
 
 public export
-MultisetAdjunction RetardedDipoleFunctor AbstractRetardedDipoleFunctor where
+MultisetDuality RetardedDipoleFunctor AbstractRetardedDipoleFunctor where
   leftAdjoint x = MkRetardedDipoleFunctor (MkDipoleState (intToBoxInt 0)) x
   rightAdjoint (MkRetardedDipoleFunctor _ x) = x
   homTensorIso = retardedDipoleHomTensorIso

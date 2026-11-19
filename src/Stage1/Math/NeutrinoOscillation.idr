@@ -38,10 +38,10 @@ pureElectronNeutrinoBeam =
 public export
 evaluateQuadStreamNeutrinoProbabilities : QuadStreamMultiset Stage0.BoxInt.BoxInt -> NeutrinoProbabilityVector
 evaluateQuadStreamNeutrinoProbabilities (MkQuadStream e h p s) =
-  let totalM = multisetSum e + multisetSum h + multisetSum p + multisetSum s
-      pe = mkUnixelFractionBox (multisetSum e) totalM
-      pmu = mkUnixelFractionBox (multisetSum h) totalM
-      ptau = mkUnixelFractionBox (multisetSum p) totalM
+  let totalM = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
+      pe = mkUnixelFractionBox (totalMassBox e) totalM
+      pmu = mkUnixelFractionBox (totalMassBox h) totalM
+      ptau = mkUnixelFractionBox (totalMassBox p) totalM
   in MkNeutrinoProbabilityVector pe pmu ptau
 
 ------------------------------------------------------------------------
@@ -133,7 +133,7 @@ proofNeutrinoHomInv (AddM (val, MkAbstractNeutrinoOscillationFunctor vec b) w re
 
 ||| Category-Theoretic MultisetAdjunction instance NeutrinoOscillationFunctor ⊣ AbstractNeutrinoOscillationFunctor
 public export
-MultisetAdjunction NeutrinoOscillationFunctor AbstractNeutrinoOscillationFunctor where
+MultisetDuality NeutrinoOscillationFunctor AbstractNeutrinoOscillationFunctor where
   leftAdjoint x = MkNeutrinoOscillationFunctor pureElectronNeutrinoBeam x
   rightAdjoint (MkNeutrinoOscillationFunctor _ x) = x
   homTensorIso = neutrinoHomTensorIso

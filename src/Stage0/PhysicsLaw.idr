@@ -36,7 +36,7 @@ composeMassConservationLaw (MkMassConservationLaw n2 op2 prf2) (MkMassConservati
     (\v => rewrite prf2 (op1 v) in prf1 v)
 
 ||| A Unified Compiler-Verified Physical Law Interface
-||| Standardises physical law operators as ChromoLawFunctors over ChromoCategory VexelSpaces,
+||| Standardises physical law operators as `ChromoLawTransform` Maxels over `VexelSpace`s,
 ||| backed by static multiset mass conservation proof witnesses.
 public export
 interface PhysicsLaw (lawID : Nat) where
@@ -46,12 +46,12 @@ interface PhysicsLaw (lawID : Nat) where
   lawSpace    : VexelSpace dimOfLaw colorOfLaw
   lawSpace    = defaultSpace dimOfLaw colorOfLaw
 
-  lawOperator : ChromoLawFunctor dimOfLaw colorOfLaw dimOfLaw colorOfLaw
+  lawOperator : ChromoLawTransform dimOfLaw colorOfLaw dimOfLaw colorOfLaw
 
   ||| Static proof witness verifying multiset mass conservation across physical law application
   0 verifyMassConservation : (v : Vexel) ->
-                             (0 prf : totalVexelMass (applyLawFunctor lawOperator v) = totalVexelMass v) ->
-                             totalVexelMass (applyLawFunctor lawOperator v) = totalVexelMass v
+                             (0 prf : totalVexelMass (applyChromoLawTransform lawOperator v) = totalVexelMass v) ->
+                             totalVexelMass (applyChromoLawTransform lawOperator v) = totalVexelMass v
   verifyMassConservation v prf = prf
 
 ------------------------------------------------------------------------
@@ -114,8 +114,6 @@ public export
 prfStagedApplyPhysicsLaw @{inst} v = Refl
 
 ||| Zero-allocation deforested streaming transducer applying a PhysicalLaw across a Vexel stream.
-||| Uses %spec lawID, fuel for monomorphic argument specialization without full AST duplication.
-%spec lawID, fuel
 public export
 streamApplyPhysicsLaw : (lawID : Nat) -> {auto inst : PhysicsLaw lawID} -> (fuel : Nat) ->
                         FusedStream Vexel -> FusedStream Vexel

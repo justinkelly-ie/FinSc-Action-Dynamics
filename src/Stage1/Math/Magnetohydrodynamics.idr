@@ -37,9 +37,9 @@ Eq PlasmaState where
 public export
 evaluateQuadStreamPlasma : QuadStreamMultiset BoxInt -> PlasmaState
 evaluateQuadStreamPlasma (MkQuadStream e h p s) =
-  let b = multisetSum e
-      rho = multisetSum h
-      v = multisetSum p
+  let b = totalMassBox e
+      rho = totalMassBox h
+      v = totalMassBox p
   in MkPlasma b rho v
 
 ------------------------------------------------------------------------
@@ -125,7 +125,7 @@ proofMHDPlasmaHomInv (AddM (val, MkAbstractMHDPlasmaFunctor plasma b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance MHDPlasmaFunctor ⊣ AbstractMHDPlasmaFunctor
 public export
-MultisetAdjunction MHDPlasmaFunctor AbstractMHDPlasmaFunctor where
+MultisetDuality MHDPlasmaFunctor AbstractMHDPlasmaFunctor where
   leftAdjoint x = MkMHDPlasmaFunctor (MkPlasma (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkMHDPlasmaFunctor _ x) = x
   homTensorIso = mhdPlasmaHomTensorIso

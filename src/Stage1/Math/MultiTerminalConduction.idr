@@ -60,7 +60,7 @@ terminalCurrents (MkConductanceMatrix3x3 g12 g13 g21 g23 g31 g32) v1 v2 v3 =
 public export
 evaluateQuadStreamTerminalCurrents : ConductanceMatrix3x3 -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> (Stage0.BoxInt.BoxInt, Stage0.BoxInt.BoxInt, Stage0.BoxInt.BoxInt)
 evaluateQuadStreamTerminalCurrents gMat (MkQuadStream e h p s) =
-  terminalCurrents gMat (multisetSum e) (multisetSum h) (multisetSum p)
+  terminalCurrents gMat (totalMassBox e) (totalMassBox h) (totalMassBox p)
 
 ||| Validates Kirchhoff Total Current Conservation: I_1 + I_2 + I_3 == 0.
 public export
@@ -152,7 +152,7 @@ proofBuettikerHomInv (AddM (val, MkAbstractBuettikerFunctor g b) w rest) =
   in cong (AddM (val, MkAbstractBuettikerFunctor g b) w) rec
 
 public export
-MultisetAdjunction BuettikerFunctor AbstractBuettikerFunctor where
+MultisetDuality BuettikerFunctor AbstractBuettikerFunctor where
   leftAdjoint x = MkBuettikerFunctor (MkConductanceMatrix3x3 0 0 0 0 0 0) x
   rightAdjoint (MkBuettikerFunctor _ x) = x
   homTensorIso = buettikerHomTensorIso

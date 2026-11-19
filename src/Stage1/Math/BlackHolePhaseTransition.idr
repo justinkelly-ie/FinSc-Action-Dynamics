@@ -96,10 +96,10 @@ auditBlackHolePhaseTransitionProof =
       eCap = natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity
       hCap = natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity
       dCap = natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue
-      e = AddM (intToBoxInt 0) eCap ZeroM
-      h = AddM (intToBoxInt 0) hCap ZeroM
-      p = AddM (intToBoxInt 0) (intToBoxInt 0) ZeroM
-      s = AddM (intToBoxInt 0) dCap ZeroM
+      e = singletonCarrier (intToBoxInt 0) eCap
+      h = singletonCarrier (intToBoxInt 0) hCap
+      p = singletonCarrier (intToBoxInt 0) (intToBoxInt 0)
+      s = singletonCarrier (intToBoxInt 0) dCap
       qs = MkQuadStream e h p s
       lowTQs = evaluateHawkingPageQuadStream qs (intToBoxInt 30)
       highTQs = evaluateHawkingPageQuadStream qs (intToBoxInt 70)
@@ -173,7 +173,7 @@ proofBlackHoleHomInv (AddM (val, MkAbstractBlackHoleFunctor sys b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance BlackHoleFunctor ⊣ AbstractBlackHoleFunctor
 public export
-MultisetAdjunction BlackHoleFunctor AbstractBlackHoleFunctor where
+MultisetDuality BlackHoleFunctor AbstractBlackHoleFunctor where
   leftAdjoint x = MkBlackHoleFunctor (MkHPSystem (intToBoxInt 50) (intToBoxInt 50) (intToBoxInt 0) ThermalAdSGas) x
   rightAdjoint (MkBlackHoleFunctor _ x) = x
   homTensorIso = blackHoleHomTensorIso

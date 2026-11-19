@@ -37,9 +37,9 @@ Eq JCParams where
 public export
 evaluateQuadStreamJCParams : QuadStreamMultiset BoxInt -> JCParams
 evaluateQuadStreamJCParams (MkQuadStream e h p s) =
-  let cavityW = multisetSum e
-      atomicW = multisetSum h
-      couplingG = multisetSum p
+  let cavityW = totalMassBox e
+      atomicW = totalMassBox h
+      couplingG = totalMassBox p
   in MkJCParams cavityW atomicW couplingG
 
 ||| Polariton Dressed States (|n, +> and |n, ->) in the n-photon manifold:
@@ -162,7 +162,7 @@ proofCavityQEDHomInv (AddM (val, MkAbstractCavityQEDFunctor p b) w rest) =
   in cong (AddM (val, MkAbstractCavityQEDFunctor p b) w) rec
 
 public export
-MultisetAdjunction CavityQEDFunctor AbstractCavityQEDFunctor where
+MultisetDuality CavityQEDFunctor AbstractCavityQEDFunctor where
   leftAdjoint x = MkCavityQEDFunctor (MkJCParams (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkCavityQEDFunctor _ x) = x
   homTensorIso = cavityQEDHomTensorIso

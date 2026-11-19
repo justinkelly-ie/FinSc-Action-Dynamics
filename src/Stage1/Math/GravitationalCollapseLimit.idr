@@ -36,7 +36,7 @@ isTOVGravitationallyStable m = m <= maxTOVMassLimit
 public export
 isTOVQuadStreamStable : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Bool
 isTOVQuadStreamStable (MkQuadStream e h p s) =
-  let totalM = multisetSum e + multisetSum h + multisetSum p + multisetSum s
+  let totalM = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
       unwrapNat = boxToNat totalM
   in isTOVGravitationallyStable unwrapNat
 
@@ -126,7 +126,7 @@ proofTOVCollapseHomInv (AddM (val, MkAbstractTOVCollapseFunctor core b) w rest) 
 
 ||| Category-Theoretic MultisetAdjunction instance TOVCollapseFunctor ⊣ AbstractTOVCollapseFunctor
 public export
-MultisetAdjunction TOVCollapseFunctor AbstractTOVCollapseFunctor where
+MultisetDuality TOVCollapseFunctor AbstractTOVCollapseFunctor where
   leftAdjoint x = MkTOVCollapseFunctor (MkStellarCore 0 False 0) x
   rightAdjoint (MkTOVCollapseFunctor _ x) = x
   homTensorIso = tovCollapseHomTensorIso

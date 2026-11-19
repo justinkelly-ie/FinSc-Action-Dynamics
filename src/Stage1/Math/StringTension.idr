@@ -26,7 +26,7 @@ linearQCDConfinementPotential sigma dist =
 public export
 evaluateQuadStreamQCDConfinement : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Nat -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamQCDConfinement (MkQuadStream e h p s) dist =
-  let sigma = multisetSum e
+  let sigma = totalMassBox e
   in linearQCDConfinementPotential sigma dist
 
 ||| Evaluates discrete spin angular momentum J along a linear Regge trajectory:
@@ -125,7 +125,7 @@ proofQCDStringHomInv (AddM (val, MkAbstractQCDStringFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractQCDStringFunctor s b) w) rec
 
 public export
-MultisetAdjunction QCDStringFunctor AbstractQCDStringFunctor where
+MultisetDuality QCDStringFunctor AbstractQCDStringFunctor where
   leftAdjoint x = MkQCDStringFunctor (MkStringState (intToBoxInt 0)) x
   rightAdjoint (MkQCDStringFunctor _ x) = x
   homTensorIso = qcdStringHomTensorIso

@@ -32,20 +32,17 @@ Ord EnantiomerHand where
   compare DHand DHand = EQ
 
 ||| Inverts enantiomer chirality (L <-> D inversion).
-%inline
 public export
 invertChirality : EnantiomerHand -> EnantiomerHand
 invertChirality LHand = DHand
 invertChirality DHand = LHand
 
 ||| Verifies homochiral peptide chain uniformity (all L-amino acids).
-%inline
 public export
 isHomochiralChain : List EnantiomerHand -> Bool
 isHomochiralChain chain = all (== LHand) chain
 
 ||| Evaluates peptide condensation token conservation: (m1 + m2 - 18) = mPeptide.
-%inline
 public export
 condensePeptideBond : BoxInt -> BoxInt -> BoxInt
 condensePeptideBond m1 m2 = (m1 + m2) - intToBoxInt 18
@@ -54,8 +51,8 @@ condensePeptideBond m1 m2 = (m1 + m2) - intToBoxInt 18
 public export
 evaluateQuadStreamPeptideCondensation : QuadStreamMultiset BoxInt -> QuadStreamMultiset BoxInt -> BoxInt
 evaluateQuadStreamPeptideCondensation (MkQuadStream e1 h1 p1 s1) (MkQuadStream e2 h2 p2 s2) =
-  let m1 = multisetSum e1 + multisetSum h1 + multisetSum p1 + multisetSum s1
-      m2 = multisetSum e2 + multisetSum h2 + multisetSum p2 + multisetSum s2
+  let m1 = totalMassBox e1 + totalMassBox h1 + totalMassBox p1 + totalMassBox s1
+      m2 = totalMassBox e2 + totalMassBox h2 + totalMassBox p2 + totalMassBox s2
   in condensePeptideBond m1 m2
 
 ------------------------------------------------------------------------
@@ -122,7 +119,7 @@ proofChiralityHomInv (AddM (val, MkAbstractChiralityFunctor hand b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance ChiralityFunctor ⊣ AbstractChiralityFunctor
 public export
-MultisetAdjunction ChiralityFunctor AbstractChiralityFunctor where
+MultisetDuality ChiralityFunctor AbstractChiralityFunctor where
   leftAdjoint x = MkChiralityFunctor LHand x
   rightAdjoint (MkChiralityFunctor _ x) = x
   homTensorIso = chiralityHomTensorIso
@@ -137,7 +134,6 @@ MultisetAdjunction ChiralityFunctor AbstractChiralityFunctor where
 ||| Audits Law 49 (Macromolecular Homochirality & Peptide Condensation):
 ||| 1. Enantiomer inversion is an involution: invert(invert(L)) == L.
 ||| 2. Peptide condensation conserves mass tokens: (100 + 100 - 18) == 182.
-%inline
 public export
 auditLaw49MacromolecularChiralityProof : Bool
 auditLaw49MacromolecularChiralityProof =

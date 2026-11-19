@@ -196,7 +196,7 @@ proofChernNumberHomInv (AddM (val, MkAbstractChernNumberFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractChernNumberFunctor s b) w) rec
 
 public export
-MultisetAdjunction ChernNumberFunctor AbstractChernNumberFunctor where
+MultisetDuality ChernNumberFunctor AbstractChernNumberFunctor where
   leftAdjoint x = MkChernNumberFunctor (MkChernState 1) x
   rightAdjoint (MkChernNumberFunctor _ x) = x
   homTensorIso = chernNumberHomTensorIso

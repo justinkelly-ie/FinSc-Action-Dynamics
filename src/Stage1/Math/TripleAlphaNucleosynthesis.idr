@@ -45,7 +45,7 @@ tripleAlphaFusionTokens alphaMass = intToBoxInt (cast tripleAlphaClusterCount) *
 public export
 evaluateQuadStreamTripleAlpha : QuadStreamMultiset BoxInt -> BoxInt
 evaluateQuadStreamTripleAlpha (MkQuadStream e h p s) =
-  let totalAlpha = multisetSum e + multisetSum h + multisetSum p + multisetSum s
+  let totalAlpha = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
   in tripleAlphaFusionTokens totalAlpha
 
 ||| Nucleon count of Phosphorus-31 (15 protons + 16 neutrons = 31).
@@ -123,7 +123,7 @@ proofTripleAlphaHomInv (AddM (val, MkAbstractTripleAlphaFunctor m b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance TripleAlphaFunctor ⊣ AbstractTripleAlphaFunctor
 public export
-MultisetAdjunction TripleAlphaFunctor AbstractTripleAlphaFunctor where
+MultisetDuality TripleAlphaFunctor AbstractTripleAlphaFunctor where
   leftAdjoint x = MkTripleAlphaFunctor (intToBoxInt 0) x
   rightAdjoint (MkTripleAlphaFunctor _ x) = x
   homTensorIso = tripleAlphaHomTensorIso

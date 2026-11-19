@@ -94,50 +94,79 @@ verifyMonadAssociativity (PhysEnv s val) f g with (f val)
     verifyMonadAssociativity (PhysEnv s val) f g | (PhysEnv s' val') | (PhysEnv s'' val'') = Refl
 
 --------------------------------------------------------------------------------
--- 5. ADJUNCTION-INDUCED PHYSICAL DYNAMICS MONAD (M(a) = R (L a))
+-- 5. DUALITY-INDUCED PHYSICAL DYNAMICS STATE ENVELOPE (M(a) = R (L a))
 --------------------------------------------------------------------------------
 
-||| Adjunction-Induced Physical Dynamics Monad M(a) = R (L a) for MultisetAdjunction l r (L ⊣ R).
-||| Represents forward law application L followed by reverse-causal pullback reconstruction R.
+||| Duality-Induced Physical State Envelope `M(a) = R (L a)` for `MultisetDuality l r`.
+||| Represents forward law pushforward `L` followed by reverse-causal pullback reconstruction `R`.
 public export
-record PhysicsMonad (0 l : Type -> Type) (0 r : Type -> Type) (a : Type) where
-  constructor MkPhysicsMonad
-  unwrapPhysicsMonad : r (l a)
+record PhysicsStateEnvelope (0 l : Type -> Type) (0 r : Type -> Type) (a : Type) where
+  constructor MkPhysicsEnvelope
+  unwrapPhysicsEnvelope : r (l a)
 
-||| Monadic return (unit η): maps state x to R (L x).
+||| Compatibility alias for `PhysicsStateEnvelope`.
 public export
-purePhysicsMonad : {0 l, r : Type -> Type} -> (a -> r (l a)) -> a -> PhysicsMonad l r a
-purePhysicsMonad injectRL x = MkPhysicsMonad (injectRL x)
+PhysicsMonad : (0 l : Type -> Type) -> (0 r : Type -> Type) -> Type -> Type
+PhysicsMonad = PhysicsStateEnvelope
 
-||| Monadic bind (>>=): evaluates physical time-step state transitions R (L a) -> (a -> PhysicsMonad l r b) -> PhysicsMonad l r b.
+||| Compatibility constructor alias for `MkPhysicsEnvelope`.
 public export
-bindPhysicsMonad : {0 l, r : Type -> Type} -> (r (l a) -> a) -> PhysicsMonad l r a -> (a -> PhysicsMonad l r b) -> PhysicsMonad l r b
-bindPhysicsMonad extractRL (MkPhysicsMonad rla) k =
+MkPhysicsMonad : r (l a) -> PhysicsStateEnvelope l r a
+MkPhysicsMonad = MkPhysicsEnvelope
+
+||| Compatibility extractor alias for `unwrapPhysicsEnvelope`.
+public export
+unwrapPhysicsMonad : PhysicsStateEnvelope l r a -> r (l a)
+unwrapPhysicsMonad = unwrapPhysicsEnvelope
+
+||| Injection (`pure`): maps state `x` to `R (L x)`.
+public export
+purePhysicsEnvelope : {0 l, r : Type -> Type} -> (a -> r (l a)) -> a -> PhysicsStateEnvelope l r a
+purePhysicsEnvelope injectRL x = MkPhysicsEnvelope (injectRL x)
+
+||| Compatibility alias for `purePhysicsEnvelope`.
+public export
+purePhysicsMonad : {0 l, r : Type -> Type} -> (a -> r (l a)) -> a -> PhysicsStateEnvelope l r a
+purePhysicsMonad = purePhysicsEnvelope
+
+||| Sequential transition (`>>=`): evaluates physical time-step updates `R (L a) -> (a -> PhysicsStateEnvelope l r b) -> PhysicsStateEnvelope l r b`.
+public export
+bindPhysicsEnvelope : {0 l, r : Type -> Type} -> (r (l a) -> a) -> PhysicsStateEnvelope l r a -> (a -> PhysicsStateEnvelope l r b) -> PhysicsStateEnvelope l r b
+bindPhysicsEnvelope extractRL (MkPhysicsEnvelope rla) k =
   let aVal = extractRL rla
   in k aVal
 
-||| QTT 0 Erased Proof: Monad Left Identity Law for PhysicsMonad:
-||| (return x >>= f) ≡ f x when extraction inverts injection.
+||| Compatibility alias for `bindPhysicsEnvelope`.
+public export
+bindPhysicsMonad : {0 l, r : Type -> Type} -> (r (l a) -> a) -> PhysicsStateEnvelope l r a -> (a -> PhysicsStateEnvelope l r b) -> PhysicsStateEnvelope l r b
+bindPhysicsMonad = bindPhysicsEnvelope
+
+||| QTT 0 Erased Proof: Left Identity Law for `PhysicsStateEnvelope`:
+||| `(pure x >>= f) == f x` when extraction inverts injection.
 public export
 0 prfMonadLeftIdentity : {0 l, r : Type -> Type} ->
                          (injectRL : a -> r (l a)) ->
                          (extractRL : r (l a) -> a) ->
                          (0 invPrf : (x : a) -> extractRL (injectRL x) = x) ->
                          (x : a) ->
-                         (k : a -> PhysicsMonad l r b) ->
-                         bindPhysicsMonad extractRL (purePhysicsMonad injectRL x) k = k x
+                         (k : a -> PhysicsStateEnvelope l r b) ->
+                         bindPhysicsEnvelope extractRL (purePhysicsEnvelope injectRL x) k = k x
 prfMonadLeftIdentity injectRL extractRL invPrf x k =
   rewrite invPrf x in Refl
 
-||| QTT 0 Erased Proof: Monad Right Identity Law for PhysicsMonad:
-||| (m >>= return) ≡ m when extraction inverts injection.
+||| QTT 0 Erased Proof: Right Identity Law for `PhysicsStateEnvelope`:
+||| `(m >>= pure) == m` when extraction inverts injection.
 public export
 0 prfMonadRightIdentity : {0 l, r : Type -> Type} ->
                           (injectRL : a -> r (l a)) ->
                           (extractRL : r (l a) -> a) ->
                           (0 invPrf : (x : r (l a)) -> injectRL (extractRL x) = x) ->
-                          (m : PhysicsMonad l r a) ->
-                          bindPhysicsMonad extractRL m (purePhysicsMonad injectRL) = m
-prfMonadRightIdentity injectRL extractRL invPrf (MkPhysicsMonad rla) =
+                          (m : PhysicsStateEnvelope l r a) ->
+                          bindPhysicsEnvelope extractRL m (purePhysicsEnvelope injectRL) = m
+prfMonadRightIdentity injectRL extractRL invPrf (MkPhysicsEnvelope rla) =
   rewrite invPrf rla in Refl
+
+-- Reference for Category Theory Readers:
+-- `PhysicsStateEnvelope l r a = R (L a)` corresponds to the state monad `M = R . L`
+-- induced by an adjunction `L -| R`.
 

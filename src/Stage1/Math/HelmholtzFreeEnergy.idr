@@ -2,10 +2,10 @@ module Stage1.Math.HelmholtzFreeEnergy
 
 import Stage0.BoxInt
 import Stage0.WitnessLedger
+import Stage0.Interfaces
 import Stage0.Multiset
 import Stage1.UnixelFraction
 import Stage1.Polynumber
-import Stage0.Multiset
 import Stage1.Math.ThermalDistribution
 import Stage1.MultisetDuality
 import Stage1.MultisetTensor
@@ -70,11 +70,23 @@ Eq BudgetSector where
   DMSector == DMSector = True
   _ == _ = False
 
-||| Encodes CosmicBudgetPartition as a pure discrete Multiset BoxInt BudgetSector.
+budgetSectorRank : BudgetSector -> Nat
+budgetSectorRank VMSector = 0
+budgetSectorRank DESector = 1
+budgetSectorRank DMSector = 2
+
 public export
-partitionToMultiset : CosmicBudgetPartition -> Stage0.Multiset.Multiset Stage0.BoxInt.BoxInt BudgetSector
+Ord BudgetSector where
+  compare x y = compare (budgetSectorRank x) (budgetSectorRank y)
+
+public export
+DiscreteCoord BudgetSector where
+
+||| Encodes CosmicBudgetPartition as a pure discrete Carrier BudgetSector.
+public export
+partitionToMultiset : CosmicBudgetPartition -> Stage0.Multiset.Carrier BudgetSector
 partitionToMultiset (MkCosmicBudgetPartition vm de dm) =
-  AddM VMSector vm (AddM DESector de (AddM DMSector dm ZeroM))
+  singletonCarrier VMSector vm <+> singletonCarrier DESector de <+> singletonCarrier DMSector dm
 
 ||| Multiset evaluation weighting for discrete internal energy U.
 public export
@@ -90,16 +102,15 @@ sectorEntropyWeight VMSector = Stage0.BoxInt.intToBoxInt 2
 sectorEntropyWeight DESector = Stage0.BoxInt.intToBoxInt 5
 sectorEntropyWeight DMSector = Stage0.BoxInt.intToBoxInt 3
 
-||| Evaluates linear weighting functional over a Multiset BoxInt BudgetSector.
+||| Evaluates linear weighting functional over a Carrier BudgetSector.
 public export
-evalBudgetMultiset : (BudgetSector -> Stage0.BoxInt.BoxInt) -> Stage0.Multiset.Multiset Stage0.BoxInt.BoxInt BudgetSector -> Stage0.BoxInt.BoxInt
-evalBudgetMultiset weight ZeroM = Stage0.BoxInt.intToBoxInt 0
-evalBudgetMultiset weight (AddM s c rest) =
-  addBox (mulBox (weight s) c) (evalBudgetMultiset weight rest)
+evalBudgetMultiset : (BudgetSector -> Stage0.BoxInt.BoxInt) -> Stage0.Multiset.Carrier BudgetSector -> Stage0.BoxInt.BoxInt
+evalBudgetMultiset weight =
+  foldBoxTreeL (\acc, (s, c) => addBox acc (mulBox (weight s) c)) (Stage0.BoxInt.intToBoxInt 0)
 
 ||| Multiset-powered discrete Helmholtz Free Energy: F = U - T * S.
 public export
-multisetHelmholtzFreeEnergy : (temp : Stage0.BoxInt.BoxInt) -> Stage0.Multiset.Multiset Stage0.BoxInt.BoxInt BudgetSector -> Stage0.BoxInt.BoxInt
+multisetHelmholtzFreeEnergy : (temp : Stage0.BoxInt.BoxInt) -> Stage0.Multiset.Carrier BudgetSector -> Stage0.BoxInt.BoxInt
 multisetHelmholtzFreeEnergy t m =
   let u = evalBudgetMultiset sectorEnergyWeight m
       s = evalBudgetMultiset sectorEntropyWeight m
@@ -211,7 +222,7 @@ proofHelmholtzHomInv (AddM (val, MkAbstractHelmholtzFunctor part b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance HelmholtzFunctor ⊣ AbstractHelmholtzFunctor
 public export
-MultisetAdjunction HelmholtzFunctor AbstractHelmholtzFunctor where
+MultisetDuality HelmholtzFunctor AbstractHelmholtzFunctor where
   leftAdjoint x = MkHelmholtzFunctor (MkCosmicBudgetPartition (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkHelmholtzFunctor _ x) = x
   homTensorIso = helmholtzHomTensorIso

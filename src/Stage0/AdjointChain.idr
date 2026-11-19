@@ -25,8 +25,8 @@ record CompositeRightFunctor (0 r1 : Type -> Type) (0 r2 : Type -> Type) (a : Ty
 public export
 record AdjointChain (0 l1, r1, l2, r2 : Type -> Type) where
   constructor MkAdjointChain
-  adj1 : MultisetAdjunction l1 r1
-  adj2 : MultisetAdjunction l2 r2
+  adj1 : MultisetDuality l1 r1
+  adj2 : MultisetDuality l2 r2
 
 ------------------------------------------------------------------------
 -- 2. COMPOSITE TENSOR-HOM NATURAL ISOMORPHISMS

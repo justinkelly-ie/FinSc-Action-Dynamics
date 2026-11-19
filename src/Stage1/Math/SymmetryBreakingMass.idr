@@ -55,7 +55,7 @@ wBosonMassSquared (MkDiscreteHiggsVacuum vevSq _ g) =
 public export
 evaluateQuadStreamWBosonMassSquared : QuadStreamMultiset BoxInt -> UnixelFraction
 evaluateQuadStreamWBosonMassSquared (MkQuadStream e h p s) =
-  let vevSq = mkUnixelFractionBox (multisetSum e) (multisetSum h)
+  let vevSq = mkUnixelFractionBox (totalMassBox e) (totalMassBox h)
       lam = mkUnixelFraction (intToBoxInt 1) 8
       g = mkUnixelFraction (intToBoxInt 2) 3
       vac = MkDiscreteHiggsVacuum vevSq lam g
@@ -118,7 +118,7 @@ proofHiggsVacuumHomInv (AddM (val, MkAbstractHiggsVacuumFunctor v b) w rest) =
   in cong (AddM (val, MkAbstractHiggsVacuumFunctor v b) w) rec
 
 public export
-MultisetAdjunction HiggsVacuumFunctor AbstractHiggsVacuumFunctor where
+MultisetDuality HiggsVacuumFunctor AbstractHiggsVacuumFunctor where
   leftAdjoint x = MkHiggsVacuumFunctor (MkDiscreteHiggsVacuum (mkUnixelFraction (intToBoxInt 0) 1) (mkUnixelFraction (intToBoxInt 0) 1) (mkUnixelFraction (intToBoxInt 0) 1)) x
   rightAdjoint (MkHiggsVacuumFunctor _ x) = x
   homTensorIso = higgsVacuumHomTensorIso

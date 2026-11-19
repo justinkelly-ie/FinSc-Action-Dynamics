@@ -27,8 +27,8 @@ ionizationFraction nFree nTotal = mkUnixelFraction nFree (boxIntToPositiveNat nT
 public export
 evaluateQuadStreamIonization : QuadStreamMultiset BoxInt -> UnixelFraction
 evaluateQuadStreamIonization (MkQuadStream e h p s) =
-  let nFree = multisetSum e
-      nTotal = multisetSum e + multisetSum h + multisetSum p + multisetSum s
+  let nFree = totalMassBox e
+      nTotal = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
   in ionizationFraction nFree nTotal
 
 ||| Verifies photon mean free path expansion (lambda -> infinity) upon recombination.
@@ -101,7 +101,7 @@ proofPlasmaRecombinationHomInv (AddM (val, MkAbstractPlasmaRecombinationFunctor 
 
 ||| Category-Theoretic MultisetAdjunction instance PlasmaRecombinationFunctor ⊣ AbstractPlasmaRecombinationFunctor
 public export
-MultisetAdjunction PlasmaRecombinationFunctor AbstractPlasmaRecombinationFunctor where
+MultisetDuality PlasmaRecombinationFunctor AbstractPlasmaRecombinationFunctor where
   leftAdjoint x = MkPlasmaRecombinationFunctor zeroUnixelFraction x
   rightAdjoint (MkPlasmaRecombinationFunctor _ x) = x
   homTensorIso = plasmaRecombinationHomTensorIso

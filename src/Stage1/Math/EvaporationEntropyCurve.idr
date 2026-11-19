@@ -74,7 +74,7 @@ fusedPageEntropyTrajectory (More f) budget = loop f 0 0
 public export
 quadStreamPageEntropyTrajectory : Fuel -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Nat
 quadStreamPageEntropyTrajectory fuel (MkQuadStream e h p s) =
-  let totalB = unwrapNat (multisetSum e + multisetSum h + multisetSum p + multisetSum s)
+  let totalB = unwrapNat (totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s)
   in fusedPageEntropyTrajectory fuel totalB
   where
     unwrapNat : Stage0.BoxInt.BoxInt -> Nat
@@ -144,7 +144,7 @@ proofPageCurveHomInv (AddM (val, MkAbstractPageCurveFunctor budget b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance PageCurveFunctor ⊣ AbstractPageCurveFunctor
 public export
-MultisetAdjunction PageCurveFunctor AbstractPageCurveFunctor where
+MultisetDuality PageCurveFunctor AbstractPageCurveFunctor where
   leftAdjoint x = MkPageCurveFunctor 0 x
   rightAdjoint (MkPageCurveFunctor _ x) = x
   homTensorIso = pageCurveHomTensorIso

@@ -21,13 +21,11 @@ iron56NucleonCount : Nat
 iron56NucleonCount = 56
 
 ||| Evaluates Iron-56 nucleus mass tokens (56 nucleons * 27 tokens/nucleon = 1512).
-%inline
 public export
 iron56MassTokens : BoxInt
 iron56MassTokens = intToBoxInt (cast (iron56NucleonCount * ellipticLatticeCapacity))
 
 ||| Verifies maximum binding energy peak per nucleon at Iron-56 (56 amu).
-%inline
 public export
 isIron56BindingPeak : BoxInt -> Bool
 isIron56BindingPeak m = m == iron56MassTokens
@@ -36,7 +34,7 @@ isIron56BindingPeak m = m == iron56MassTokens
 public export
 isIron56QuadStreamBindingPeak : QuadStreamMultiset BoxInt -> Bool
 isIron56QuadStreamBindingPeak (MkQuadStream e h p s) =
-  let totalM = multisetSum e + multisetSum h + multisetSum p + multisetSum s
+  let totalM = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
   in isIron56BindingPeak totalM
 
 ------------------------------------------------------------------------
@@ -103,7 +101,7 @@ proofPeakBindingHomInv (AddM (val, MkAbstractPeakBindingFunctor m b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance PeakBindingFunctor ⊣ AbstractPeakBindingFunctor
 public export
-MultisetAdjunction PeakBindingFunctor AbstractPeakBindingFunctor where
+MultisetDuality PeakBindingFunctor AbstractPeakBindingFunctor where
   leftAdjoint x = MkPeakBindingFunctor (intToBoxInt 0) x
   rightAdjoint (MkPeakBindingFunctor _ x) = x
   homTensorIso = peakBindingHomTensorIso
@@ -118,7 +116,6 @@ MultisetAdjunction PeakBindingFunctor AbstractPeakBindingFunctor where
 ||| Audits Law 53 (Stellar Nucleosynthesis & Iron-56 Peak Binding):
 ||| 1. 56Fe carries exactly 1512 mass tokens.
 ||| 2. Confirms binding energy saturation peak at 56 nucleons.
-%inline
 public export
 auditLaw53Iron56PeakBindingProof : Bool
 auditLaw53Iron56PeakBindingProof =

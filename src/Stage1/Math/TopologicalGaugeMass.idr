@@ -27,8 +27,8 @@ discreteChernSimonsMass k e2 = k * e2
 public export
 evaluateQuadStreamChernSimonsMass : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamChernSimonsMass (MkQuadStream e h p s) =
-  let k = multisetSum e
-      e2 = multisetSum h
+  let k = totalMassBox e
+      e2 = totalMassBox h
   in discreteChernSimonsMass k e2
 
 ||| Proves Parity & Time-Reversal Oddness of Chern-Simons mass:
@@ -130,7 +130,7 @@ proofChernSimonsHomInv (AddM (val, MkAbstractChernSimonsFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractChernSimonsFunctor s b) w) rec
 
 public export
-MultisetAdjunction ChernSimonsFunctor AbstractChernSimonsFunctor where
+MultisetDuality ChernSimonsFunctor AbstractChernSimonsFunctor where
   leftAdjoint x = MkChernSimonsFunctor (MkChernSimonsState (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkChernSimonsFunctor _ x) = x
   homTensorIso = chernSimonsHomTensorIso

@@ -33,8 +33,8 @@ Eq DiscreteQubit where
 public export
 evaluateQuadStreamQubit : QuadStreamMultiset Stage0.BoxInt.BoxInt -> DiscreteQubit
 evaluateQuadStreamQubit (MkQuadStream e h p s) =
-  let alpha = multisetSum e
-      beta = multisetSum h
+  let alpha = totalMassBox e
+      beta = totalMassBox h
   in MkQubit alpha beta
 
 ||| Discrete 2-bit Classical Measurement Syndrome outcome:
@@ -163,7 +163,7 @@ proofTeleportationHomInv (AddM (val, MkAbstractTeleportationFunctor q b) w rest)
   in cong (AddM (val, MkAbstractTeleportationFunctor q b) w) rec
 
 public export
-MultisetAdjunction TeleportationFunctor AbstractTeleportationFunctor where
+MultisetDuality TeleportationFunctor AbstractTeleportationFunctor where
   leftAdjoint x = MkTeleportationFunctor (MkQubit (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkTeleportationFunctor _ x) = x
   homTensorIso = teleportationHomTensorIso

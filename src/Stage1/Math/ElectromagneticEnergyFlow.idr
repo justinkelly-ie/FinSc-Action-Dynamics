@@ -63,9 +63,9 @@ stepPoyntingEnergy (MkDiscreteEMCell e b s j) =
 public export
 stepPoyntingEnergyQuadStream : QuadStreamMultiset BoxInt -> DiscreteEMCell -> QuadStreamMultiset BoxInt
 stepPoyntingEnergyQuadStream (MkQuadStream e h p s) cell =
-  let stepStream : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
-      stepStream ZeroM = ZeroM
-      stepStream (AddM v w rest) = AddM v (stepPoyntingEnergy (MkDiscreteEMCell w w (poyntingFluxOut cell) (jouleWork cell))) (stepStream rest)
+  let stepStream : Carrier BoxInt -> Carrier BoxInt
+      stepStream = foldBoxTreeL (\acc, (v, w) =>
+        acc <+> singletonCarrier v (stepPoyntingEnergy (MkDiscreteEMCell w w (poyntingFluxOut cell) (jouleWork cell)))) neutral
   in MkQuadStream (stepStream e) (stepStream h) (stepStream p) (stepStream s)
 
 ||| Verifies local discrete Poynting conservation:
@@ -94,16 +94,16 @@ auditLocalPoyntingBalanceProof =
       u0 = electromagneticEnergyDensity (MkDiscreteEMCell (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 15) (Stage0.BoxInt.intToBoxInt 5))
       u1 = stepPoyntingEnergy (MkDiscreteEMCell (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 50) (Stage0.BoxInt.intToBoxInt 15) (Stage0.BoxInt.intToBoxInt 5))
       
-      e = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
-      h = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
-      p = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
-      s = AddM (intToBoxInt 1) (intToBoxInt 50) ZeroM
+      e = singletonCarrier (intToBoxInt 1) (intToBoxInt 50)
+      h = singletonCarrier (intToBoxInt 1) (intToBoxInt 50)
+      p = singletonCarrier (intToBoxInt 1) (intToBoxInt 50)
+      s = singletonCarrier (intToBoxInt 1) (intToBoxInt 50)
       qs = MkQuadStream e h p s
       qsStepped = stepPoyntingEnergyQuadStream qs cell
   in u0 == Stage0.BoxInt.intToBoxInt 100 &&
      u1 == Stage0.BoxInt.intToBoxInt 80 &&
      verifyLocalPoyntingBalance cell &&
-     multisetSum (ellipticStream qsStepped) == intToBoxInt 80
+     totalMassBox (ellipticStream qsStepped) == intToBoxInt 80
 
 ||| Audits Vacuum Poynting Conservation (No Current J = 0):
 ||| Proves that in closed flux balance (div S = 0, J·E = 0), total EM energy is strictly invariant:
@@ -204,7 +204,7 @@ proofPoyntingHomInv (AddM (val, MkAbstractPoyntingFunctor cell b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance PoyntingVectorFunctor ⊣ AbstractPoyntingFunctor
 public export
-MultisetAdjunction PoyntingVectorFunctor AbstractPoyntingFunctor where
+MultisetDuality PoyntingVectorFunctor AbstractPoyntingFunctor where
   leftAdjoint x = MkPoyntingVectorFunctor (MkDiscreteEMCell (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkPoyntingVectorFunctor _ x) = x
   homTensorIso = poyntingHomTensorIso

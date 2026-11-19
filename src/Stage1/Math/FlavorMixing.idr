@@ -139,7 +139,7 @@ pmnsUnitarityValid =
 ||| Executes Matter/Anti-Matter Multiset Pair Annihilation:
 ||| Multiset_Matter(+1) + Multiset_AntiMatter(-1) -> Multiset_DEPhoton(+2)
 public export
-annihilateMatterAntiMatterMultiset : Box BoxInt -> Box BoxInt -> Box BoxInt
+annihilateMatterAntiMatterMultiset : Carrier BoxInt -> Carrier BoxInt -> Carrier BoxInt
 annihilateMatterAntiMatterMultiset _ mat =
   insertBox (intToBoxInt 2) (intToBoxInt 1) mat
 
@@ -228,7 +228,7 @@ proofFlavorMixingHomInv (AddM (val, MkAbstractFlavorMixingFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractFlavorMixingFunctor s b) w) rec
 
 public export
-MultisetAdjunction FlavorMixingFunctor AbstractFlavorMixingFunctor where
+MultisetDuality FlavorMixingFunctor AbstractFlavorMixingFunctor where
   leftAdjoint x = MkFlavorMixingFunctor (MkFlavorState UpU DownD) x
   rightAdjoint (MkFlavorMixingFunctor _ x) = x
   homTensorIso = flavorMixingHomTensorIso

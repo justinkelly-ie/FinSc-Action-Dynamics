@@ -62,18 +62,18 @@ public export
 saturateQuadStreamHolographic : Nat -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> QuadStreamMultiset Stage0.BoxInt.BoxInt
 saturateQuadStreamHolographic dimL (MkQuadStream e h p s) =
   let cap = holographicCapacity dimL
-      eN = natVal (multisetSum e)
-      hN = natVal (multisetSum h)
-      pN = natVal (multisetSum p)
-      sN = natVal (multisetSum s)
+      eN = natVal (totalMassBox e)
+      hN = natVal (totalMassBox h)
+      pN = natVal (totalMassBox p)
+      sN = natVal (totalMassBox s)
       (eBound, eEx) = saturateHolographicTokens dimL eN
       (hBound, hEx) = saturateHolographicTokens dimL hN
       (pBound, pEx) = saturateHolographicTokens dimL pN
       totalSubstrate = eEx + hEx + pEx + sN
-  in MkQuadStream (AddM 0 (Stage0.BoxInt.intToBoxInt (cast eBound)) ZeroM)
-                  (AddM 0 (Stage0.BoxInt.intToBoxInt (cast hBound)) ZeroM)
-                  (AddM 0 (Stage0.BoxInt.intToBoxInt (cast pBound)) ZeroM)
-                  (AddM 0 (Stage0.BoxInt.intToBoxInt (cast totalSubstrate)) ZeroM)
+  in MkQuadStream (singletonCarrier (intToBoxInt 0) (Stage0.BoxInt.intToBoxInt (cast eBound)))
+                  (singletonCarrier (intToBoxInt 0) (Stage0.BoxInt.intToBoxInt (cast hBound)))
+                  (singletonCarrier (intToBoxInt 0) (Stage0.BoxInt.intToBoxInt (cast pBound)))
+                  (singletonCarrier (intToBoxInt 0) (Stage0.BoxInt.intToBoxInt (cast totalSubstrate)))
   where
     natVal : Stage0.BoxInt.BoxInt -> Nat
     natVal = boxToNat
@@ -208,7 +208,7 @@ proofHolographicBoundHomInv (AddM (val, MkAbstractHolographicBoundFunctor s b) w
   in cong (AddM (val, MkAbstractHolographicBoundFunctor s b) w) rec
 
 public export
-MultisetAdjunction HolographicBoundFunctor AbstractHolographicBoundFunctor where
+MultisetDuality HolographicBoundFunctor AbstractHolographicBoundFunctor where
   leftAdjoint x = MkHolographicBoundFunctor (MkHolographicState 3) x
   rightAdjoint (MkHolographicBoundFunctor _ x) = x
   homTensorIso = holographicBoundHomTensorIso

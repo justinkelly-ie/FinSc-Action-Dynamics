@@ -149,7 +149,7 @@ proofJarzynskiHomInv (AddM (val, MkAbstractJarzynskiFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractJarzynskiFunctor s b) w) rec
 
 public export
-MultisetAdjunction JarzynskiFunctor AbstractJarzynskiFunctor where
+MultisetDuality JarzynskiFunctor AbstractJarzynskiFunctor where
   leftAdjoint x = MkJarzynskiFunctor (MkJarzynskiState (intToBoxInt 0)) x
   rightAdjoint (MkJarzynskiFunctor _ x) = x
   homTensorIso = jarzynskiHomTensorIso

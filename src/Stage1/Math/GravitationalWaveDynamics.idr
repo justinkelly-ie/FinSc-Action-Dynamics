@@ -43,8 +43,8 @@ traceMetricShear (MkMetricShearTT p _) = p + (negate p)
 public export
 evaluateQuadStreamMetricShear : QuadStreamMultiset Stage0.BoxInt.BoxInt -> MetricShearTT
 evaluateQuadStreamMetricShear (MkQuadStream e h p s) =
-  let hP = multisetSum e - multisetSum h
-      hC = multisetSum p - multisetSum s
+  let hP = totalMassBox e - totalMassBox h
+      hC = totalMassBox p - totalMassBox s
   in MkMetricShearTT hP hC
 
 ------------------------------------------------------------------------
@@ -126,7 +126,7 @@ proofGWDynamicsHomInv (AddM (val, MkAbstractGWDynamicsFunctor shear b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance GWDynamicsFunctor ⊣ AbstractGWDynamicsFunctor
 public export
-MultisetAdjunction GWDynamicsFunctor AbstractGWDynamicsFunctor where
+MultisetDuality GWDynamicsFunctor AbstractGWDynamicsFunctor where
   leftAdjoint x = MkGWDynamicsFunctor (MkMetricShearTT (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkGWDynamicsFunctor _ x) = x
   homTensorIso = gwDynamicsHomTensorIso

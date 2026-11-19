@@ -46,7 +46,7 @@ trappedMagneticFlux (MkSuperconductingLoop _ f0 n) = n * f0
 public export
 evaluateQuadStreamTrappedFlux : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamTrappedFlux (MkQuadStream e h p s) =
-  let loop = MkSuperconductingLoop (Stage0.BoxInt.intToBoxInt 2) (multisetSum e) (multisetSum h)
+  let loop = MkSuperconductingLoop (Stage0.BoxInt.intToBoxInt 2) (totalMassBox e) (totalMassBox h)
   in trappedMagneticFlux loop
 
 ------------------------------------------------------------------------
@@ -126,7 +126,7 @@ proofFluxQuantizationHomInv (AddM (val, MkAbstractFluxQuantizationFunctor loop b
 
 ||| Category-Theoretic MultisetAdjunction instance FluxQuantizationFunctor ⊣ AbstractFluxQuantizationFunctor
 public export
-MultisetAdjunction FluxQuantizationFunctor AbstractFluxQuantizationFunctor where
+MultisetDuality FluxQuantizationFunctor AbstractFluxQuantizationFunctor where
   leftAdjoint x = MkFluxQuantizationFunctor (MkSuperconductingLoop (intToBoxInt 2) (intToBoxInt 1) (intToBoxInt 0)) x
   rightAdjoint (MkFluxQuantizationFunctor _ x) = x
   homTensorIso = fluxQuantizationHomTensorIso

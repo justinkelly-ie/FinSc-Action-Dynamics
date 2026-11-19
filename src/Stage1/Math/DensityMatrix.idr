@@ -186,7 +186,7 @@ proofDensityMatrixHomInv (AddM (val, MkAbstractDensityMatrixFunctor s b) w rest)
   in cong (AddM (val, MkAbstractDensityMatrixFunctor s b) w) rec
 
 public export
-MultisetAdjunction DensityMatrixFunctor AbstractDensityMatrixFunctor where
+MultisetDuality DensityMatrixFunctor AbstractDensityMatrixFunctor where
   leftAdjoint x = MkDensityMatrixFunctor (MkDensityMatrixState (intToBoxInt 1)) x
   rightAdjoint (MkDensityMatrixFunctor _ x) = x
   homTensorIso = densityMatrixHomTensorIso

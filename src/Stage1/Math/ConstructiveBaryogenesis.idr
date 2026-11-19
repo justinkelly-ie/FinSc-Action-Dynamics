@@ -55,9 +55,9 @@ baryonAsymmetryRatio state =
 public export
 evaluateBaryogenesisQuadStream : QuadStreamMultiset Stage0.BoxInt.BoxInt -> BaryonState
 evaluateBaryogenesisQuadStream (MkQuadStream e h p s) =
-  let posBaryons = multisetSum e
-      negBaryons = multisetSum h
-      photons = multisetSum p + multisetSum s
+  let posBaryons = totalMassBox e
+      negBaryons = totalMassBox h
+      photons = totalMassBox p + totalMassBox s
   in MkBaryonState posBaryons negBaryons photons
 
 ------------------------------------------------------------------------
@@ -177,7 +177,7 @@ proofBaryogenesisHomInv (AddM (val, MkAbstractBaryogenesisFunctor state b) w res
 
 ||| Category-Theoretic MultisetAdjunction instance BaryogenesisFunctor ⊣ AbstractBaryogenesisFunctor
 public export
-MultisetAdjunction BaryogenesisFunctor AbstractBaryogenesisFunctor where
+MultisetDuality BaryogenesisFunctor AbstractBaryogenesisFunctor where
   leftAdjoint x = MkBaryogenesisFunctor (MkBaryonState (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkBaryogenesisFunctor _ x) = x
   homTensorIso = baryogenesisHomTensorIso

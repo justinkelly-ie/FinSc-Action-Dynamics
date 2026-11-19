@@ -35,10 +35,10 @@ rationalSnellRefraction n1 s1 n2 s2 =
 public export
 evaluateQuadStreamSnellRefraction : QuadStreamMultiset BoxInt -> BoxInt
 evaluateQuadStreamSnellRefraction (MkQuadStream e h p s) =
-  let n1 = multisetSum e
-      s1 = multisetSum h
-      n2 = multisetSum p
-      s2 = multisetSum s
+  let n1 = totalMassBox e
+      s1 = totalMassBox h
+      n2 = totalMassBox p
+      s2 = totalMassBox s
   in rationalSnellRefraction n1 s1 n2 s2
 
 ||| Verifies non-reflective total internal refraction invariant.
@@ -113,7 +113,7 @@ proofRefractionHomInv (AddM (val, MkAbstractRefractionFunctor n1 s1 n2 s2 b) w r
 
 ||| Category-Theoretic MultisetAdjunction instance RefractionFunctor ⊣ AbstractRefractionFunctor
 public export
-MultisetAdjunction RefractionFunctor AbstractRefractionFunctor where
+MultisetDuality RefractionFunctor AbstractRefractionFunctor where
   leftAdjoint x = MkRefractionFunctor (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) x
   rightAdjoint (MkRefractionFunctor _ _ _ _ x) = x
   homTensorIso = refractionHomTensorIso

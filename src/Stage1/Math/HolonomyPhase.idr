@@ -78,7 +78,7 @@ traceGaussianLink MinusI   = intToBoxInt 0
 public export
 evaluateQuadStreamHolonomy : QuadStreamMultiset Stage0.BoxInt.BoxInt -> GaussianLink
 evaluateQuadStreamHolonomy (MkQuadStream e h p s) =
-  let wE = (cast {to = Integer} (boxToNat (absBox (multisetSum e)))) `mod` 4
+  let wE = (cast {to = Integer} (boxToNat (absBox (totalMassBox e)))) `mod` 4
   in case wE of
        0 => PlusOne
        1 => PlusI
@@ -159,7 +159,7 @@ proofWilsonLoopHomInv (AddM (val, MkAbstractWilsonLoopFunctor link b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance WilsonLoopFunctor ⊣ AbstractWilsonLoopFunctor
 public export
-MultisetAdjunction WilsonLoopFunctor AbstractWilsonLoopFunctor where
+MultisetDuality WilsonLoopFunctor AbstractWilsonLoopFunctor where
   leftAdjoint x = MkWilsonLoopFunctor PlusOne x
   rightAdjoint (MkWilsonLoopFunctor _ x) = x
   homTensorIso = wilsonLoopHomTensorIso

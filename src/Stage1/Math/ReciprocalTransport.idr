@@ -52,7 +52,7 @@ entropyProductionRate (MkTransportMatrix2x2 l11 l12 l21 l22) x1 x2 =
 public export
 evaluateQuadStreamEntropyProduction : TransportMatrix2x2 -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamEntropyProduction lMat (MkQuadStream e h p s) =
-  entropyProductionRate lMat (multisetSum e) (multisetSum h)
+  entropyProductionRate lMat (totalMassBox e) (totalMassBox h)
 
 ------------------------------------------------------------------------
 -- 2. CONSTRUCTIVE FORMAL AUDIT PROOFS
@@ -133,7 +133,7 @@ proofOnsagerHomInv (AddM (val, MkAbstractOnsagerFunctor m b) w rest) =
   in cong (AddM (val, MkAbstractOnsagerFunctor m b) w) rec
 
 public export
-MultisetAdjunction OnsagerFunctor AbstractOnsagerFunctor where
+MultisetDuality OnsagerFunctor AbstractOnsagerFunctor where
   leftAdjoint x = MkOnsagerFunctor (MkTransportMatrix2x2 (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkOnsagerFunctor _ x) = x
   homTensorIso = onsagerHomTensorIso

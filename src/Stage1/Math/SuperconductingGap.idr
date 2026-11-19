@@ -76,7 +76,7 @@ synthesizeBCSState debye coupling dos =
 public export
 evaluateQuadStreamBCS : QuadStreamMultiset BoxInt -> DiscreteBCSState
 evaluateQuadStreamBCS (MkQuadStream e h p s) =
-  synthesizeBCSState (multisetSum e) (multisetSum h) (multisetSum p)
+  synthesizeBCSState (totalMassBox e) (totalMassBox h) (totalMassBox p)
 
 ------------------------------------------------------------------------
 -- 3. FORMAL INVARIANT AUDIT
@@ -161,7 +161,7 @@ proofBCSGapHomInv (AddM (val, MkAbstractBCSGapFunctor state b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance BCSGapFunctor ⊣ AbstractBCSGapFunctor
 public export
-MultisetAdjunction BCSGapFunctor AbstractBCSGapFunctor where
+MultisetDuality BCSGapFunctor AbstractBCSGapFunctor where
   leftAdjoint x = MkBCSGapFunctor (MkBCSState (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkBCSGapFunctor _ x) = x
   homTensorIso = bcsGapHomTensorIso

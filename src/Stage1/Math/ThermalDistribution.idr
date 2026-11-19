@@ -273,10 +273,10 @@ cosmicCaretStreamPoly =
 public export
 quadStreamPartitionSum : QuadStreamMultiset Stage0.BoxInt.BoxInt -> (maxLevel : Nat) -> (numQ : Nat) -> (denQ : Nat) -> Nat
 quadStreamPartitionSum (MkQuadStream e h p s) maxLevel numQ denQ =
-  let eSum = scaledPartitionSum ellipticLadder maxLevel numQ denQ * natVal (multisetSum e)
-      hSum = scaledPartitionSum hyperbolicLadder maxLevel numQ denQ * natVal (multisetSum h)
-      pSum = scaledPartitionSum parabolicLadder maxLevel numQ denQ * natVal (multisetSum p)
-      sSum = natVal (multisetSum s)
+  let eSum = scaledPartitionSum ellipticLadder maxLevel numQ denQ * natVal (totalMassBox e)
+      hSum = scaledPartitionSum hyperbolicLadder maxLevel numQ denQ * natVal (totalMassBox h)
+      pSum = scaledPartitionSum parabolicLadder maxLevel numQ denQ * natVal (totalMassBox p)
+      sSum = natVal (totalMassBox s)
   in eSum + hSum + pSum + sSum
   where
     natVal : Stage0.BoxInt.BoxInt -> Nat
@@ -387,7 +387,7 @@ proofThermalDistributionHomInv (AddM (val, MkAbstractThermalDistributionFunctor 
   in cong (AddM (val, MkAbstractThermalDistributionFunctor s b) w) rec
 
 public export
-MultisetAdjunction ThermalDistributionFunctor AbstractThermalDistributionFunctor where
+MultisetDuality ThermalDistributionFunctor AbstractThermalDistributionFunctor where
   leftAdjoint x = MkThermalDistributionFunctor (MkThermalState 1 1 1) x
   rightAdjoint (MkThermalDistributionFunctor _ x) = x
   homTensorIso = thermalDistributionHomTensorIso

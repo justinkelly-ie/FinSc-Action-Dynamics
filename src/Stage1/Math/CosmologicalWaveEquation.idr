@@ -70,10 +70,10 @@ auditZeroWheelerDeWittConstraintProof =
   let eCap = natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity
       hCap = natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity
       dCap = natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue
-      e = AddM (intToBoxInt 0) eCap ZeroM
-      h = AddM (intToBoxInt 0) hCap ZeroM
-      p = AddM (intToBoxInt 0) (intToBoxInt 0) ZeroM
-      s = AddM (intToBoxInt 0) dCap ZeroM
+      e = singletonCarrier (intToBoxInt 0) eCap
+      h = singletonCarrier (intToBoxInt 0) hCap
+      p = singletonCarrier (intToBoxInt 0) (intToBoxInt 0)
+      s = singletonCarrier (intToBoxInt 0) dCap
       qs = MkQuadStream e h p s
       hTotal = discreteSuperHamiltonianQuadStream qs (Stage0.BoxInt.intToBoxInt 474)
   in Stage0.BoxInt.boxIsZero hTotal
@@ -158,7 +158,7 @@ proofDeWittWaveHomInv (AddM (val, MkAbstractDeWittWaveFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractDeWittWaveFunctor s b) w) rec
 
 public export
-MultisetAdjunction DeWittWaveFunctor AbstractDeWittWaveFunctor where
+MultisetDuality DeWittWaveFunctor AbstractDeWittWaveFunctor where
   leftAdjoint x = MkDeWittWaveFunctor (MkDeWittState (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkDeWittWaveFunctor _ x) = x
   homTensorIso = deWittWaveHomTensorIso

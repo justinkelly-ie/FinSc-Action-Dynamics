@@ -55,7 +55,7 @@ isWhiteDwarfStable mass =
 public export
 isWhiteDwarfQuadStreamStable : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Bool
 isWhiteDwarfQuadStreamStable (MkQuadStream e h p s) =
-  let totalMass = multisetSum e + multisetSum h + multisetSum p + multisetSum s
+  let totalMass = totalMassBox e + totalMassBox h + totalMassBox p + totalMassBox s
   in totalMass <= chandrasekharLimitBound
 
 ------------------------------------------------------------------------
@@ -122,7 +122,7 @@ proofDegeneracyMassHomInv (AddM (val, MkAbstractDegeneracyMassFunctor core b) w 
 
 ||| Category-Theoretic MultisetAdjunction instance DegeneracyMassFunctor ⊣ AbstractDegeneracyMassFunctor
 public export
-MultisetAdjunction DegeneracyMassFunctor AbstractDegeneracyMassFunctor where
+MultisetDuality DegeneracyMassFunctor AbstractDegeneracyMassFunctor where
   leftAdjoint x = MkDegeneracyMassFunctor (MkWDFCore (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkDegeneracyMassFunctor _ x) = x
   homTensorIso = degeneracyMassHomTensorIso

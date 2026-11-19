@@ -52,10 +52,10 @@ genesisVacuum = MkGenesisState (Stage0.BoxInt.intToBoxInt 0) Stage1.FourGeometri
 public export
 genesisQuadStream : QuadStreamMultiset BoxInt
 genesisQuadStream =
-  let e = AddM (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) ZeroM
-      h = AddM (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity) ZeroM
-      p = AddM (intToBoxInt 0) (intToBoxInt 0) ZeroM
-      s = AddM (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) ZeroM
+  let e = singletonCarrier (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity)
+      h = singletonCarrier (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity)
+      p = singletonCarrier (intToBoxInt 0) (intToBoxInt 0)
+      s = singletonCarrier (intToBoxInt 0) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue)
   in MkQuadStream e h p s
 
 ||| Audits the Primordial Genesis Budget Partition: 0 + 128 + 55 == 183 <= 210,
@@ -113,11 +113,11 @@ landauerFreezeOutStep bits tScale dmCount =
 --    (Law 18: Discrete Cosmic Genesis & Primordial Relic Freeze-Out)
 ------------------------------------------------------------------------
 
-||| Aggregates a list of multiset token bags using addMultiset fold.
+||| Aggregates a list of carrier token bags using semigroup (<+>) fold.
 public export
-aggregateMultisets : List (Stage0.Multiset.Multiset Stage0.BoxInt.BoxInt String) -> Stage0.Multiset.Multiset Stage0.BoxInt.BoxInt String
-aggregateMultisets [] = Stage0.Multiset.ZeroM
-aggregateMultisets (x :: xs) = Stage0.Multiset.addMultiset x (aggregateMultisets xs)
+aggregateMultisets : List (Stage0.Multiset.Carrier String) -> Stage0.Multiset.Carrier String
+aggregateMultisets [] = neutral
+aggregateMultisets (x :: xs) = x <+> aggregateMultisets xs
 
 
 ||| Audits the Primordial Relic Freeze-Out & Landauer Dissipation Invariant:
@@ -251,7 +251,7 @@ proofCosmicGenesisHomInv (AddM (val, MkAbstractCosmicGenesisFunctor state b) w r
 
 ||| Category-Theoretic MultisetAdjunction instance CosmicGenesisFunctor ⊣ AbstractCosmicGenesisFunctor
 public export
-MultisetAdjunction CosmicGenesisFunctor AbstractCosmicGenesisFunctor where
+MultisetDuality CosmicGenesisFunctor AbstractCosmicGenesisFunctor where
   leftAdjoint x = MkCosmicGenesisFunctor genesisVacuum x
   rightAdjoint (MkCosmicGenesisFunctor _ x) = x
   homTensorIso = cosmicGenesisHomTensorIso

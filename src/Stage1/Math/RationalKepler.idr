@@ -32,8 +32,8 @@ keplerHarmonicRatio t a = (t * t) - (a * a * a)
 public export
 evaluateQuadStreamKeplerHarmonic : QuadStreamMultiset BoxInt -> BoxInt
 evaluateQuadStreamKeplerHarmonic (MkQuadStream e h p s) =
-  let t = multisetSum e
-      a = multisetSum h
+  let t = totalMassBox e
+      a = totalMassBox h
   in keplerHarmonicRatio t a
 
 ||| Verifies rational orbital stability over discrete 3-torus T3.
@@ -106,7 +106,7 @@ proofKeplerHomInv (AddM (val, MkAbstractKeplerFunctor t a b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance KeplerFunctor ⊣ AbstractKeplerFunctor
 public export
-MultisetAdjunction KeplerFunctor AbstractKeplerFunctor where
+MultisetDuality KeplerFunctor AbstractKeplerFunctor where
   leftAdjoint x = MkKeplerFunctor (intToBoxInt 0) (intToBoxInt 0) x
   rightAdjoint (MkKeplerFunctor _ _ x) = x
   homTensorIso = keplerHomTensorIso

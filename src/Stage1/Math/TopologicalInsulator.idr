@@ -65,8 +65,8 @@ synthesizeTIState gap bulkZ2 =
 public export
 evaluateQuadStreamTIState : QuadStreamMultiset BoxInt -> DiscreteTIState
 evaluateQuadStreamTIState (MkQuadStream e h p s) =
-  let gap = multisetSum e
-      bulkZ2 = if boxToNat (multisetSum h) > 0 then 1 else Z
+  let gap = totalMassBox e
+      bulkZ2 = if boxToNat (totalMassBox h) > 0 then 1 else Z
   in synthesizeTIState gap bulkZ2
 
 ------------------------------------------------------------------------
@@ -149,7 +149,7 @@ proofTIHomInv (AddM (val, MkAbstractTIFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractTIFunctor s b) w) rec
 
 public export
-MultisetAdjunction TIFunctor AbstractTIFunctor where
+MultisetDuality TIFunctor AbstractTIFunctor where
   leftAdjoint x = MkTIFunctor (MkTIState (intToBoxInt 0) 0 0 (intToBoxInt 0)) x
   rightAdjoint (MkTIFunctor _ x) = x
   homTensorIso = tiHomTensorIso

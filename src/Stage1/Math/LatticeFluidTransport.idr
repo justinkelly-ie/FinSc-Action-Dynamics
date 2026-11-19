@@ -68,10 +68,10 @@ Eq D2Q9Node where
 public export
 evaluateQuadStreamFluidNode : QuadStreamMultiset Stage0.BoxInt.BoxInt -> D2Q9Node
 evaluateQuadStreamFluidNode (MkQuadStream e h p s) =
-  let f0 = multisetSum e
-      f1 = multisetSum h
-      f2 = multisetSum p
-      f3 = multisetSum s
+  let f0 = totalMassBox e
+      f1 = totalMassBox h
+      f2 = totalMassBox p
+      f3 = totalMassBox s
       z = intToBoxInt 0
   in MkD2Q9Node f0 f1 f2 f3 z z z z z
 
@@ -197,7 +197,7 @@ proofLatticeFluidHomInv (AddM (val, MkAbstractLatticeFluidFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractLatticeFluidFunctor s b) w) rec
 
 public export
-MultisetAdjunction LatticeFluidFunctor AbstractLatticeFluidFunctor where
+MultisetDuality LatticeFluidFunctor AbstractLatticeFluidFunctor where
   leftAdjoint x = MkLatticeFluidFunctor (MkD2Q9Node (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkLatticeFluidFunctor _ x) = x
   homTensorIso = latticeFluidHomTensorIso

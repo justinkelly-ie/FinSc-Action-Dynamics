@@ -46,8 +46,8 @@ Eq HorizonState where
 public export
 evaluateHorizonQuadStream : Nat -> QuadStreamMultiset Stage0.BoxInt.BoxInt -> HorizonState
 evaluateHorizonQuadStream area (MkQuadStream e h p s) =
-  let bhMass = multisetSum e + multisetSum h + multisetSum p
-      rad = multisetSum s
+  let bhMass = totalMassBox e + totalMassBox h + totalMassBox p
+      rad = totalMassBox s
   in MkHorizonState area bhMass rad
 
 ||| Computes exact discrete Hawking Temperature as an exact rational fraction:
@@ -141,7 +141,7 @@ proofHorizonRadiationHomInv (AddM (val, MkAbstractHorizonRadiationFunctor st b) 
 
 ||| Category-Theoretic MultisetAdjunction instance HorizonRadiationFunctor ⊣ AbstractHorizonRadiationFunctor
 public export
-MultisetAdjunction HorizonRadiationFunctor AbstractHorizonRadiationFunctor where
+MultisetDuality HorizonRadiationFunctor AbstractHorizonRadiationFunctor where
   leftAdjoint x = MkHorizonRadiationFunctor (MkHorizonState 0 (intToBoxInt 0) (intToBoxInt 0)) x
   rightAdjoint (MkHorizonRadiationFunctor _ x) = x
   homTensorIso = horizonRadiationHomTensorIso

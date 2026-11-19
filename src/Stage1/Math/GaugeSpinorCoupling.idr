@@ -51,7 +51,7 @@ coupledDiracDensity (MkGaugeCoupledSpinor s _ _) = spinorProbabilityDensity s
 public export
 evaluateQuadStreamGaugeSpinorDensity : QuadStreamMultiset Stage0.BoxInt.BoxInt -> Stage0.BoxInt.BoxInt
 evaluateQuadStreamGaugeSpinorDensity (MkQuadStream e h p s) =
-  multisetSum e + multisetSum h
+  totalMassBox e + totalMassBox h
 
 ------------------------------------------------------------------------
 -- 2. TRANSVERSE-TRACELESS METRIC SHEAR INTERACTION
@@ -129,7 +129,7 @@ proofGaugeSpinorHomInv (AddM (val, MkAbstractGaugeSpinorFunctor g b) w rest) =
 
 ||| Category-Theoretic MultisetAdjunction instance GaugeSpinorFunctor ⊣ AbstractGaugeSpinorFunctor
 public export
-MultisetAdjunction GaugeSpinorFunctor AbstractGaugeSpinorFunctor where
+MultisetDuality GaugeSpinorFunctor AbstractGaugeSpinorFunctor where
   leftAdjoint x = MkGaugeSpinorFunctor (MkGaugeCoupledSpinor (MkDiracSpinor4 (MkPixel 0 0) (MkPixel 0 0) (MkPixel 0 0) (MkPixel 0 0)) (intToBoxInt 0) (intToBoxInt 0, intToBoxInt 0, intToBoxInt 0, intToBoxInt 0)) x
   rightAdjoint (MkGaugeSpinorFunctor _ x) = x
   homTensorIso = gaugeSpinorHomIso

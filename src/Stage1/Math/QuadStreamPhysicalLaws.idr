@@ -30,9 +30,9 @@ import Data.Vect
 public export
 quadStreamToCosmicPartition : QuadStreamMultiset BoxInt -> CosmicBudgetPartition
 quadStreamToCosmicPartition (MkQuadStream e h p s) =
-  let vm = multisetSum e
-      de = multisetSum h
-      dm = multisetSum s
+  let vm = totalMassBox e
+      de = totalMassBox h
+      dm = totalMassBox s
   in MkCosmicBudgetPartition vm de dm
 
 ||| Evaluates discrete Helmholtz Free Energy (F = U - T * S) over a physical QuadStreamMultiset payload.
@@ -49,14 +49,14 @@ evalQuadStreamHelmholtzFreeEnergy temp qs =
 public export
 applyPhysicalQuadStreamFilter : (lawDegree : Nat) -> QuadStreamMultiset BoxInt -> QuadStreamMultiset BoxInt
 applyPhysicalQuadStreamFilter lawDegree (MkQuadStream e h p s) =
-  let filterStream : Multiset BoxInt BoxInt -> Multiset BoxInt BoxInt
-      filterStream ZeroM = ZeroM
-      filterStream (AddM v w rest) =
-        let dBox = intToBoxInt (cast lawDegree)
-            rem  = if dBox == intToBoxInt 0 then intToBoxInt 0 else modBox v dBox
-        in if rem == intToBoxInt 0
-             then AddM v w (filterStream rest)
-             else filterStream rest
+  let filterStream : Carrier BoxInt -> Carrier BoxInt
+      filterStream =
+        foldBoxTreeL (\acc, (v, w) =>
+          let dBox = intToBoxInt (cast lawDegree)
+              rem  = if dBox == intToBoxInt 0 then intToBoxInt 0 else modBox v dBox
+          in if rem == intToBoxInt 0
+               then acc <+> singletonCarrier v w
+               else acc) BoxLeaf
   in MkQuadStream (filterStream e)
                (filterStream h)
                (filterStream p)
@@ -146,9 +146,8 @@ pipelineQuadStreamLedger temp qs =
     quadStreamNodeCount (MkQuadStream e h p s) =
       mCount e + mCount h + mCount p + mCount s
       where
-        mCount : Multiset countC countElem -> Nat
-        mCount ZeroM = 0
-        mCount (AddM _ _ rest) = S (mCount rest)
+        mCount : Carrier countElem -> Nat
+        mCount = foldBoxTreeL (\acc, _ => S acc) 0
 
     processElement : (BoxInt, (BoxInt, BoxInt, BoxInt, BoxInt), BoxInt)
                   -> (QuadStreamChannel, BoxInt, BoxInt)
@@ -257,14 +256,15 @@ stepQuadStreamLinearPassband : (1 qs : QuadStreamMultiset BoxInt) -> (lawDegree 
 stepQuadStreamLinearPassband (MkQuadStream e h p s) lawDegree =
   MkQuadStream (filterM e) (filterM h) (filterM p) (filterM s)
   where
-    filterM : (1 m : Multiset BoxInt BoxInt) -> Multiset BoxInt BoxInt
-    filterM ZeroM = ZeroM
-    filterM (AddM v w rest) =
-      let dBox = intToBoxInt (cast lawDegree)
+    filterM : (1 m : Carrier BoxInt) -> Carrier BoxInt
+    filterM BoxLeaf = BoxLeaf
+    filterM (BoxNode _ l v w r) =
+      let l' = filterM l
+          r' = filterM r
+          dBox = intToBoxInt (cast lawDegree)
           rem  = if dBox == intToBoxInt 0 then intToBoxInt 0 else modBox v dBox
-      in if rem == intToBoxInt 0
-           then AddM v w (filterM rest)
-           else filterM rest
+          kept = if rem == intToBoxInt 0 then singletonCarrier v w else BoxLeaf
+      in l' <+> kept <+> r'
 
 ||| Cyclotomic passband filter transducer certified by GohPrime p.
 public export
@@ -292,10 +292,10 @@ auditPipelineQuadStreamLedgerProof =
       hCap = natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity
       dCap = natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue
       bTot = natToBoxInt Stage1.FourGeometries.primorial210Budget
-      testQs = MkQuadStream (AddM (intToBoxInt 1) eCap ZeroM)
-                            (AddM (intToBoxInt 1) hCap ZeroM)
-                            ZeroM
-                            (AddM (intToBoxInt 1) dCap ZeroM)
+      testQs = MkQuadStream (singletonCarrier (intToBoxInt 1) eCap)
+                            (singletonCarrier (intToBoxInt 1) hCap)
+                            BoxLeaf
+                            (singletonCarrier (intToBoxInt 1) dCap)
       ledger = pipelineQuadStreamLedger (intToBoxInt 2) testQs
   in ledger.totalMass == bTot &&
      ledger.ellipticMass == eCap &&
@@ -313,7 +313,7 @@ auditComposableLawAssociativityProof =
       l3 = cyclotomicFilterTransducer 3
       c1 = composeLawTransducers (composeLawTransducers l1 l2) l3
       c2 = composeLawTransducers l1 (composeLawTransducers l2 l3)
-      testQs = MkQuadStream (AddM (intToBoxInt 6) (intToBoxInt 27) ZeroM) ZeroM ZeroM ZeroM
+      testQs = MkQuadStream (singletonCarrier (intToBoxInt 6) (intToBoxInt 27)) BoxLeaf BoxLeaf BoxLeaf
       out1 = stepQuadStreamWithTransducer testQs c1
       out2 = stepQuadStreamWithTransducer testQs c2
   in quadStreamTotalMass out1 == quadStreamTotalMass out2
@@ -326,7 +326,7 @@ auditComposableLawAssociativityProof =
 ||| Static compile-time proof witness verifying physical QuadStream zero-mass vacuum state.
 public export
 0 verifyPhysicalQuadStreamConservation :
-  quadStreamTotalMass (MkQuadStream ZeroM ZeroM ZeroM ZeroM) = intToBoxInt 0
+  quadStreamTotalMass (MkQuadStream BoxLeaf BoxLeaf BoxLeaf BoxLeaf) = intToBoxInt 0
 verifyPhysicalQuadStreamConservation = Refl
 
 ||| Static compile-time witness verifying composite law identity preservation.
@@ -337,7 +337,7 @@ verifyCompositeLawIdentity qs = Refl
 ||| Static compile-time witness verifying that GohPrime passband filtering preserves the vacuum.
 public export
 0 verifyGohPrimeVacuumFiltering : {p : Nat} -> (prf : GohPrime p) ->
-  applyPhysicalGohPrimeFilter prf (MkQuadStream ZeroM ZeroM ZeroM ZeroM) = MkQuadStream ZeroM ZeroM ZeroM ZeroM
+  applyPhysicalGohPrimeFilter prf (MkQuadStream BoxLeaf BoxLeaf BoxLeaf BoxLeaf) = MkQuadStream BoxLeaf BoxLeaf BoxLeaf BoxLeaf
 verifyGohPrimeVacuumFiltering prf = Refl
 
 --------------------------------------------------------------------------------
@@ -410,7 +410,7 @@ proofQuadLawHomInv (AddM (val, MkAbstractQuadLawFunctor s b) w rest) =
   in cong (AddM (val, MkAbstractQuadLawFunctor s b) w) rec
 
 public export
-MultisetAdjunction QuadLawFunctor AbstractQuadLawFunctor where
+MultisetDuality QuadLawFunctor AbstractQuadLawFunctor where
   leftAdjoint x = MkQuadLawFunctor (MkQuadLawState 1) x
   rightAdjoint (MkQuadLawFunctor _ x) = x
   homTensorIso = quadLawHomTensorIso
@@ -432,7 +432,7 @@ drainParabolicDissipation : (erasureTokens : BoxInt) ->
                            QuadStreamMultiset BoxInt ->
                            QuadStreamMultiset BoxInt
 drainParabolicDissipation tokens (MkQuadStream e h p s) =
-  MkQuadStream e h (AddM (intToBoxInt 0) tokens p) s
+  MkQuadStream e h (p <+> singletonCarrier (intToBoxInt 0) tokens) s
 
 ||| Zero-allocation deforested streaming transducer draining parabolic dissipation with %spec fuel:
 %spec fuel
